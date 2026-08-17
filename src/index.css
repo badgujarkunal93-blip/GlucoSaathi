@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Light Healthcare Canvas */
+    --canvas-bg: #F7F8F4;
+    --workspace-bg: #FFFFFF;
+    --surface-secondary: #F2F5F2;
+    --border-subtle: rgba(22, 42, 70, 0.08);
+    --border-card: rgba(22, 42, 70, 0.08);
+    
+    /* Typography */
+    --text-navy: #172640;
+    --text-navy-secondary: #5A6E85;
+    --text-navy-muted: #8292A6;
+    
+    /* Refined Vibrant Pastel Healthcare Paper Cards */
+    --card-mint-bg: #D8F3E7;
+    --card-mint-border: #B8E8D2;
+    --card-mint-text: #093B22;
+    --card-mint-sub: #166442;
+    
+    --card-peach-bg: #FFE0D1;
+    --card-peach-border: #FFC4AB;
+    --card-peach-text: #552310;
+    --card-peach-sub: #8D4023;
+    
+    --card-sky-bg: #DCEBFF;
+    --card-sky-border: #B8D7FF;
+    --card-sky-text: #0F315E;
+    --card-sky-sub: #25589A;
+    
+    --card-lavender-bg: #E9E3FF;
+    --card-lavender-border: #CEBFFC;
+    --card-lavender-text: #2B1D61;
+    --card-lavender-sub: #533BA1;
+    
+    --card-yellow-bg: #FFF1B8;
+    --card-yellow-border: #FFE280;
+    --card-yellow-text: #4B3903;
+    --card-yellow-sub: #785E09;
+    
+    --card-aqua-bg: #D9F5F6;
+    --card-aqua-border: #B2ECF0;
+    --card-aqua-text: #08444B;
+    --card-aqua-sub: #146B76;
+    
+    --card-coral-bg: #FFD9D4;
+    --card-coral-border: #FFB4A8;
+    --card-coral-text: #5A150D;
+    --card-coral-sub: #962C20;
+
+    --teal-primary: #00AFC1;
+    --teal-hover: #0098A8;
+  }
+
+  body {
+    background-color: var(--canvas-bg);
+    color: var(--text-navy);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.font-display {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Subtle Neutral Paper Card Shadow System */
+.shell-elevation {
+  box-shadow: 0 8px 28px rgba(22, 42, 70, 0.06);
+}
+
+.paper-elevation-base {
+  box-shadow: 0 2px 8px rgba(22, 42, 70, 0.055);
+}
+
+.paper-elevation-hero {
+  box-shadow: 0 4px 14px rgba(22, 42, 70, 0.07);
+}
+
+.paper-elevation-interactive {
+  box-shadow: 0 2px 8px rgba(22, 42, 70, 0.055);
+  transition: all 0.17s ease-out;
+}
+
+.paper-elevation-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 16px rgba(22, 42, 70, 0.09);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.18s ease-out forwards;
+}
