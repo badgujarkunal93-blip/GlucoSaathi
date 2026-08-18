@@ -1,0 +1,45 @@
+# Datasets Configuration & Provenance Metadata
+datasets:
+  hupa_ucm:
+    name: "HUPA-UCM Diabetes Dataset"
+    doi: "10.17632/3hbcscwz44.1"
+    url: "https://data.mendeley.com/datasets/3hbcscwz44/1"
+    license: "CC BY 4.0"
+    role: "primary_training"
+    population: "25 individuals with Type 1 Diabetes"
+    sensor: "Abbott FreeStyle Libre 2 (CGM) + Fitbit Ionic"
+    sampling_rate_minutes: 5
+    raw_dir: "ml/data/raw/hupa_ucm"
+    file_format: "csv"
+    delimiter: ";"
+    columns:
+      time: "time"
+      glucose: "glucose"
+      calories: "calories"
+      heart_rate: "heart_rate"
+      steps: "steps"
+      basal_rate: "basal_rate"
+      bolus_volume: "bolus_volume_delivered"
+      carbs: "carb_input"
+
+  t1d_uom:
+    name: "T1D-UOM: Longitudinal Multimodal Dataset of Type 1 Diabetes"
+    zenodo_record: "15169264"
+    url: "https://zenodo.org/records/15169264"
+    role: "external_validation"
+    population: "17 individuals with Type 1 Diabetes"
+    raw_dir: "ml/data/raw/t1d_uom"
+
+  ohiot1dm:
+    name: "OhioT1DM Dataset (2018/2020 Releases)"
+    url: "https://webpages.charlotte.edu/rbunescu/data/ohiot1dm/OhioT1DM-dataset.html"
+    role: "credentialed_benchmark"
+    access_protocol: "Requires formal DTA request via Ohio University"
+    raw_dir: "ml/data/external/ohiot1dm"
+
+  ifct_2020:
+    name: "Indian Food Composition Tables (IFCT 2020)"
+    publisher: "National Institute of Nutrition (ICMR-NIN)"
+    url: "https://www.nin.res.in"
+    role: "nutrition_reference_lookup"
+    local_path: "data/indianFoods.json"

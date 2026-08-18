@@ -1,0 +1,106 @@
+{
+  "persistence": {
+    "val_metrics": {
+      "rmse": 17.89,
+      "mae": 12.58,
+      "mard_pct": 10.27,
+      "r2": 0.854,
+      "zone_a_pct": 86.32,
+      "zone_b_pct": 9.91,
+      "zone_c_pct": 2.32,
+      "zone_d_pct": 1.45,
+      "zone_e_pct": 0.0,
+      "zone_ab_pct": 96.23
+    },
+    "test_metrics": {
+      "rmse": 23.47,
+      "mae": 15.94,
+      "mard_pct": 11.22,
+      "r2": 0.887,
+      "zone_a_pct": 83.8,
+      "zone_b_pct": 11.37,
+      "zone_c_pct": 3.28,
+      "zone_d_pct": 1.52,
+      "zone_e_pct": 0.03,
+      "zone_ab_pct": 95.17
+    }
+  },
+  "ridge": {
+    "val_metrics": {
+      "rmse": 14.93,
+      "mae": 10.68,
+      "mard_pct": 9.13,
+      "r2": 0.898,
+      "zone_a_pct": 90.16,
+      "zone_b_pct": 6.76,
+      "zone_c_pct": 1.34,
+      "zone_d_pct": 1.75,
+      "zone_e_pct": 0.0,
+      "zone_ab_pct": 96.91
+    },
+    "test_metrics": {
+      "rmse": 19.07,
+      "mae": 12.97,
+      "mard_pct": 9.71,
+      "r2": 0.925,
+      "zone_a_pct": 90.06,
+      "zone_b_pct": 7.06,
+      "zone_c_pct": 1.52,
+      "zone_d_pct": 1.32,
+      "zone_e_pct": 0.04,
+      "zone_ab_pct": 97.12
+    }
+  },
+  "lightgbm": {
+    "val_metrics": {
+      "rmse": 14.31,
+      "mae": 9.87,
+      "mard_pct": 8.45,
+      "r2": 0.907,
+      "zone_a_pct": 90.39,
+      "zone_b_pct": 6.73,
+      "zone_c_pct": 0.76,
+      "zone_d_pct": 2.12,
+      "zone_e_pct": 0.0,
+      "zone_ab_pct": 97.12
+    },
+    "test_metrics": {
+      "rmse": 17.22,
+      "mae": 11.74,
+      "mard_pct": 8.7,
+      "r2": 0.939,
+      "zone_a_pct": 91.1,
+      "zone_b_pct": 6.1,
+      "zone_c_pct": 1.02,
+      "zone_d_pct": 1.77,
+      "zone_e_pct": 0.02,
+      "zone_ab_pct": 97.2
+    }
+  },
+  "xgboost": {
+    "val_metrics": {
+      "rmse": 14.19,
+      "mae": 9.8,
+      "mard_pct": 8.37,
+      "r2": 0.908,
+      "zone_a_pct": 90.66,
+      "zone_b_pct": 6.54,
+      "zone_c_pct": 0.79,
+      "zone_d_pct": 2.01,
+      "zone_e_pct": 0.0,
+      "zone_ab_pct": 97.2
+    },
+    "test_metrics": {
+      "rmse": 17.31,
+      "mae": 11.82,
+      "mard_pct": 8.74,
+      "r2": 0.938,
+      "zone_a_pct": 90.93,
+      "zone_b_pct": 6.19,
+      "zone_c_pct": 1.05,
+      "zone_d_pct": 1.81,
+      "zone_e_pct": 0.01,
+      "zone_ab_pct": 97.12
+    }
+  }
+}

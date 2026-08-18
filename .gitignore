@@ -22,3 +22,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment & Virtualenvs
+.env
+.venv
+ml/.venv
+env/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Large Raw and Processed Data (Generated via ml/src pipelines)
+ml/data/raw/
+ml/data/processed/
+!ml/data/metadata/
+!ml/data/external/

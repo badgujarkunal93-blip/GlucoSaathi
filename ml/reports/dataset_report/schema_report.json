@@ -1,0 +1,472 @@
+{
+  "total_patients": 25,
+  "total_harmonized_rows": 309392,
+  "columns": [
+    "timestamp",
+    "patient_id",
+    "glucose",
+    "basal_rate",
+    "heart_rate",
+    "bolus_volume",
+    "carbs",
+    "steps",
+    "calories",
+    "source_dataset"
+  ],
+  "patient_reports": [
+    {
+      "patient_id": "HUPA0001P",
+      "total_rows": 4096,
+      "valid_rows": 4096,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0002P",
+      "total_rows": 3181,
+      "valid_rows": 3181,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0003P",
+      "total_rows": 3770,
+      "valid_rows": 3770,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0004P",
+      "total_rows": 3184,
+      "valid_rows": 3184,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0005P",
+      "total_rows": 3858,
+      "valid_rows": 3858,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0006P",
+      "total_rows": 2290,
+      "valid_rows": 2290,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0007P",
+      "total_rows": 3857,
+      "valid_rows": 3857,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0009P",
+      "total_rows": 3812,
+      "valid_rows": 3812,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0010P",
+      "total_rows": 2976,
+      "valid_rows": 2976,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0011P",
+      "total_rows": 3839,
+      "valid_rows": 3839,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0014P",
+      "total_rows": 3829,
+      "valid_rows": 3829,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0015P",
+      "total_rows": 3792,
+      "valid_rows": 3792,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0016P",
+      "total_rows": 3835,
+      "valid_rows": 3835,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0017P",
+      "total_rows": 3599,
+      "valid_rows": 3599,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 4,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": [
+        "bolus_volume: 4 values out of bounds [0.0, 35.0]. Clamped/Masked."
+      ]
+    },
+    {
+      "patient_id": "HUPA0018P",
+      "total_rows": 3895,
+      "valid_rows": 3895,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0019P",
+      "total_rows": 3711,
+      "valid_rows": 3711,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0020P",
+      "total_rows": 2862,
+      "valid_rows": 2862,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0021P",
+      "total_rows": 2343,
+      "valid_rows": 2343,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0022P",
+      "total_rows": 4023,
+      "valid_rows": 4023,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0023P",
+      "total_rows": 3919,
+      "valid_rows": 3919,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0024P",
+      "total_rows": 2902,
+      "valid_rows": 2902,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0025P",
+      "total_rows": 4006,
+      "valid_rows": 4006,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 1,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": [
+        "calories: 1 values out of bounds [0.0, 100.0]. Clamped/Masked."
+      ]
+    },
+    {
+      "patient_id": "HUPA0026P",
+      "total_rows": 40605,
+      "valid_rows": 40605,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0027P",
+      "total_rows": 165306,
+      "valid_rows": 165306,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    },
+    {
+      "patient_id": "HUPA0028P",
+      "total_rows": 25902,
+      "valid_rows": 25902,
+      "glucose_missing_pct": 0.0,
+      "out_of_bounds_counts": {
+        "glucose": 0,
+        "basal_rate": 0,
+        "bolus_volume": 0,
+        "carbs": 0,
+        "steps": 0,
+        "calories": 0,
+        "heart_rate": 0
+      },
+      "time_gaps_count": 0,
+      "is_valid": true,
+      "warnings": []
+    }
+  ]
+}

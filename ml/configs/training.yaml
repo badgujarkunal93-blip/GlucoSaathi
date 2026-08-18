@@ -1,0 +1,50 @@
+# Training Targets, Horizons & Model Hyperparameters
+training:
+  tasks:
+    glucose_forecasting:
+      target_type: "continuous_regression"
+      prediction_horizon_minutes: 30
+      primary_metric: "rmse"
+      clinical_metric: "clarke_ega_ab_pct"
+      target_clarke_zone_ab_min: 98.0
+      models:
+        persistence: {}
+        ridge:
+          alpha: 1.0
+        lightgbm:
+          n_estimators: 150
+          learning_rate: 0.05
+          max_depth: 6
+          subsample: 0.8
+          colsample_bytree: 0.8
+          random_state: 42
+        xgboost:
+          n_estimators: 150
+          learning_rate: 0.05
+          max_depth: 5
+          subsample: 0.8
+          random_state: 42
+
+    hypoglycemia_prediction:
+      target_type: "binary_classification"
+      prediction_horizon_minutes: 45
+      hypo_threshold_mg_dl: 70.0
+      level2_threshold_mg_dl: 54.0
+      primary_metric: "auprc"
+      clinical_metric: "sensitivity_at_90_spec"
+      models:
+        logistic_regression:
+          class_weight: "balanced"
+        lightgbm:
+          n_estimators: 200
+          learning_rate: 0.03
+          max_depth: 5
+          scale_pos_weight: 5.0
+          random_state: 42
+
+  split_strategy:
+    type: "patient_level_stratified"
+    train_ratio: 0.72  # 18 of 25 patients
+    val_ratio: 0.12    # 3 of 25 patients
+    test_ratio: 0.16   # 4 of 25 patients
+    seed: 42

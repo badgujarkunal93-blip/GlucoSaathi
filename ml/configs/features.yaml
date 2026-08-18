@@ -1,0 +1,31 @@
+# Feature Engineering Parameters & Physiological Modeling Settings
+features:
+  glucose:
+    lags_minutes: [5, 10, 15, 30, 45, 60]
+    roc_windows_minutes: [5, 15, 30]
+    rolling_windows_minutes: [30, 60]
+    compute_accel: true
+    compute_lbgi: true
+    compute_cv: true
+
+  insulin:
+    iob_decay_model: "mudaliar_polynomial" # or "exponential"
+    dia_hours: 4.0
+    t_max_minutes: 60.0
+    cumulative_windows_hours: [1.0, 2.0, 4.0]
+
+  meals:
+    cob_absorption_rate_g_per_hr: 30.0
+    cumulative_windows_hours: [1.0, 2.0, 4.0]
+
+  activity:
+    steps_rolling_minutes: [15, 30, 60]
+    post_exercise_decay_minutes: 180.0
+    intensity_met_map:
+      resting: 1.0
+      light: 2.5
+      moderate: 4.5
+      intense: 8.0
+
+  temporal:
+    circadian_harmonics: true

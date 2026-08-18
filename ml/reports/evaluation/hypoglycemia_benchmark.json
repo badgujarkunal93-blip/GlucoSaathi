@@ -1,0 +1,66 @@
+{
+  "logistic_regression": {
+    "val_metrics": {
+      "sensitivity_recall": 0.9332,
+      "specificity": 0.8572,
+      "precision": 0.4305,
+      "f1_score": 0.5892,
+      "auroc": 0.9659,
+      "auprc": 0.8398,
+      "brier_score": 0.0716,
+      "false_alarms_per_week": 258.06,
+      "tp": 16731,
+      "fp": 22132,
+      "fn": 1197,
+      "tn": 132841,
+      "ece": 0.1163
+    },
+    "test_metrics": {
+      "sensitivity_recall": 0.9676,
+      "specificity": 0.9034,
+      "precision": 0.5692,
+      "f1_score": 0.7168,
+      "auroc": 0.9857,
+      "auprc": 0.931,
+      "brier_score": 0.0463,
+      "false_alarms_per_week": 172.0,
+      "tp": 5673,
+      "fp": 4293,
+      "fn": 190,
+      "tn": 40161,
+      "ece": 0.0764
+    }
+  },
+  "lightgbm": {
+    "val_metrics": {
+      "sensitivity_recall": 0.8648,
+      "specificity": 0.9352,
+      "precision": 0.6069,
+      "f1_score": 0.7133,
+      "auroc": 0.9699,
+      "auprc": 0.8711,
+      "brier_score": 0.0389,
+      "false_alarms_per_week": 117.09,
+      "tp": 15504,
+      "fp": 10042,
+      "fn": 2424,
+      "tn": 144931,
+      "ece": 0.0422
+    },
+    "test_metrics": {
+      "sensitivity_recall": 0.9345,
+      "specificity": 0.9506,
+      "precision": 0.7139,
+      "f1_score": 0.8094,
+      "auroc": 0.988,
+      "auprc": 0.9467,
+      "brier_score": 0.0271,
+      "false_alarms_per_week": 87.98,
+      "tp": 5479,
+      "fp": 2196,
+      "fn": 384,
+      "tn": 42258,
+      "ece": 0.0336
+    }
+  }
+}

@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* GlucoSaathi Editorial Healthcare Palette */
+    --teal-primary: #075B57;
+    --teal-dark: #063F3D;
+    --green-primary: #1E9E67;
+    --green-soft: #DFF4E8;
+    --green-light: #F0FAF4;
+    
+    --bg-canvas: #F7F8F5;
+    --bg-warm: #F3F1EA;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #FCFDFB;
+    
+    --border-subtle: rgba(17, 24, 23, 0.07);
+    --border-medium: rgba(17, 24, 23, 0.12);
+    --border-teal: rgba(7, 91, 87, 0.18);
+    
+    /* Typography Colors */
+    --text-main: #111817;
+    --text-muted: #66716F;
+    --text-subtle: #8A9694;
+    --text-white: #FFFFFF;
+    
+    /* Clinical Risk & Alert Tokens */
+    --risk-low: #1E9E67;
+    --risk-low-bg: #DFF4E8;
+    --risk-moderate: #F2B84B;
+    --risk-moderate-bg: #FEF7E6;
+    --risk-high: #C84B52;
+    --risk-high-bg: #FDE8E9;
+    --risk-soft: #E56B6F;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-main);
+    font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Typography Classes */
+.font-display {
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-editorial {
+  font-family: 'Outfit', 'Manrope', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.font-sans {
+  font-family: 'DM Sans', 'Inter', sans-serif;
+}
+
+/* Editorial Layered Card Elevations */
+.editorial-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(17, 24, 23, 0.035);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+}
+
+.editorial-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(7, 91, 87, 0.07);
+  border-color: var(--border-teal);
+}
+
+.editorial-card-hero {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(7, 91, 87, 0.06);
+}
+
+.editorial-card-dark {
+  background: var(--teal-dark);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(6, 63, 61, 0.18);
+}
+
+/* Floating Glass Navbar */
+.floating-navbar {
+  background: rgba(247, 248, 245, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(17, 24, 23, 0.08);
+  box-shadow: 0 8px 32px rgba(17, 24, 23, 0.04);
+}
+
+/* Bento Grid Utilities */
+.bento-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Subtle Organic Blob Animation */
+@keyframes floatSlow {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(12px, -15px) scale(1.03); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 9s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+/* Accessibility: Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
