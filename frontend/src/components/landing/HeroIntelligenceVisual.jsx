@@ -7,10 +7,9 @@ import {
   Sparkles, 
   Cpu, 
   ShieldCheck, 
-  LayoutDashboard, 
-  ArrowRight,
   TrendingDown,
-  CheckCircle2
+  CheckCircle2,
+  Zap
 } from 'lucide-react';
 
 export default function HeroIntelligenceVisual() {
@@ -31,17 +30,27 @@ export default function HeroIntelligenceVisual() {
   ];
 
   return (
-    <div className="relative w-full max-w-xl mx-auto">
-      {/* Decorative Outer Glow */}
-      <div className="absolute -inset-1.5 bg-gradient-to-r from-[#075B57]/15 to-[#1E9E67]/20 rounded-3xl blur-lg pointer-events-none" />
+    <div className="relative w-full max-w-[500px] lg:max-w-[520px] mx-auto self-center">
+      
+      {/* 1. Anchored Radial Background Glow */}
+      <div className="absolute -inset-4 bg-gradient-to-tr from-[#075B57]/10 via-[#1E9E67]/15 to-[#FFE280]/10 rounded-[36px] blur-xl pointer-events-none" />
 
-      {/* Main Glass Panel */}
-      <div className="relative bg-white/95 backdrop-blur-md rounded-2xl border border-black/10 shadow-2xl p-6 sm:p-7 space-y-5">
+      {/* 2. Top System Micro-Annotation */}
+      <div className="flex items-center justify-between px-3 py-1 mb-2 text-[10px] font-black uppercase tracking-widest text-[#075B57]">
+        <span className="flex items-center space-x-1.5">
+          <Zap className="w-3 h-3 text-[#1E9E67]" />
+          <span>Multimodal Stream Active</span>
+        </span>
+        <span className="text-[#66716F]">Sampling: Continuous</span>
+      </div>
+
+      {/* 3. Main Glass / Clinical Intelligence Card */}
+      <div className="relative bg-white/95 backdrop-blur-md rounded-3xl border border-black/10 shadow-2xl p-6 sm:p-7 lg:p-8 space-y-5">
         
         {/* Panel Header */}
-        <div className="flex items-center justify-between border-b border-black/8 pb-3.5">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#075B57] text-white flex items-center justify-center shadow-xs">
+        <div className="flex items-center justify-between border-b border-black/8 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-xl bg-[#075B57] text-white flex items-center justify-center shadow-xs">
               <Sparkles className="w-4 h-4 text-[#DFF4E8]" />
             </div>
             <div>
@@ -50,41 +59,47 @@ export default function HeroIntelligenceVisual() {
                   GLUCOSAATHI INTELLIGENCE CORE
                 </span>
               </div>
-              <span className="text-[10px] text-[#66716F]">
-                Continuous Multimodal Context Synthesis
+              <span className="text-[10px] font-medium text-[#66716F]">
+                Continuous Context Synthesis & Forecasting
               </span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-[#DFF4E8] text-[#075B57] text-[10px] font-black uppercase tracking-wider border border-[#B8E8D2]">
+          <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#DFF4E8] text-[#075B57] text-[10px] font-black uppercase tracking-wider border border-[#B8E8D2] shadow-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-[#1E9E67] animate-pulse" />
-            <span>LIVE CONTEXT FLOW</span>
+            <span>LIVE CONTEXT</span>
           </div>
         </div>
 
         {/* Input Signals Stream */}
         <div className="space-y-2">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#66716F] block">
-            PATIENT CONTEXT SIGNALS
-          </span>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#66716F]">
+              PATIENT CONTEXT SIGNALS
+            </span>
+            <span className="text-[9px] font-bold text-[#075B57]">
+              4/4 Signals Synced
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2.5">
             {inputSignals.map((sig, i) => {
               const Icon = sig.icon;
               const isPulsing = pulseStep === i;
               return (
                 <div 
                   key={sig.id}
-                  className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center space-x-2.5 ${
+                  className={`p-3 rounded-xl border transition-all duration-300 flex items-center space-x-2.5 ${
                     isPulsing
                       ? 'bg-white border-[#075B57] shadow-sm ring-1 ring-[#075B57]/20 scale-102'
                       : 'bg-[#F7F8F5] border-black/5'
                   }`}
                 >
                   <div 
-                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
                     style={{ backgroundColor: sig.bg, color: sig.color }}
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <span className="text-[9px] font-bold text-[#66716F] block uppercase truncate">
@@ -102,17 +117,17 @@ export default function HeroIntelligenceVisual() {
 
         {/* Dynamic Convergence Visual Conduit */}
         <div className="relative py-1 flex items-center justify-center">
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-[#075B57]/30 to-transparent" />
-          <div className="absolute px-3 py-0.5 bg-white border border-black/10 rounded-full text-[9px] font-extrabold text-[#075B57] uppercase tracking-wider shadow-xs">
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-[#075B57]/25 to-transparent" />
+          <div className="absolute px-3 py-0.5 bg-[#F7F8F5] border border-black/10 rounded-full text-[9px] font-extrabold text-[#075B57] uppercase tracking-wider shadow-xs">
             TRANSFORMATION & INFERENCE
           </div>
         </div>
 
         {/* 3-Stage Pipeline Output Cards */}
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-3 gap-2.5 text-center">
           
           {/* Stage 1: AI Nutrition */}
-          <div className="p-3 rounded-xl bg-[#F7F8F5] border border-black/5 space-y-1">
+          <div className="p-3 rounded-2xl bg-[#F7F8F5] border border-black/5 space-y-1">
             <span className="text-[9px] font-black uppercase text-[#8D4023] block tracking-tight">
               01 • NUTRITION
             </span>
@@ -125,7 +140,7 @@ export default function HeroIntelligenceVisual() {
           </div>
 
           {/* Stage 2: ML Inference */}
-          <div className="p-3 rounded-xl bg-[#DFF4E8]/60 border border-[#B8E8D2] space-y-1 shadow-xs">
+          <div className="p-3 rounded-2xl bg-[#DFF4E8]/70 border border-[#B8E8D2] space-y-1 shadow-xs">
             <span className="text-[9px] font-black uppercase text-[#075B57] block tracking-tight">
               02 • ML MODEL
             </span>
@@ -138,7 +153,7 @@ export default function HeroIntelligenceVisual() {
           </div>
 
           {/* Stage 3: Forecast */}
-          <div className="p-3 rounded-xl bg-[#F7F8F5] border border-black/5 space-y-1">
+          <div className="p-3 rounded-2xl bg-[#F7F8F5] border border-black/5 space-y-1">
             <span className="text-[9px] font-black uppercase text-[#063F3D] block tracking-tight">
               03 • 30M FORECAST
             </span>
@@ -152,8 +167,8 @@ export default function HeroIntelligenceVisual() {
 
         </div>
 
-        {/* Footer Guarantee Strip */}
-        <div className="p-2.5 rounded-xl bg-[#F3F1EA] border border-black/5 flex items-center justify-between text-[10px] text-[#063F3D] font-bold">
+        {/* Footer Clinical Guarantee */}
+        <div className="p-3 rounded-2xl bg-[#F3F1EA] border border-black/5 flex items-center justify-between text-[10px] text-[#063F3D] font-bold">
           <div className="flex items-center space-x-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-[#1E9E67]" />
             <span>Deterministic Safety Rules + Clinical Explainability</span>
@@ -162,6 +177,13 @@ export default function HeroIntelligenceVisual() {
         </div>
 
       </div>
+
+      {/* 4. Bottom System Annotation */}
+      <div className="flex items-center justify-center space-x-2 mt-2.5 text-[10px] font-bold text-[#66716F]">
+        <ShieldCheck className="w-3.5 h-3.5 text-[#075B57]" />
+        <span>Explainable Risk Attribution & 90% Conformal Prediction</span>
+      </div>
+
     </div>
   );
 }
