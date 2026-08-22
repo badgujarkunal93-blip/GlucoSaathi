@@ -19,7 +19,7 @@ import LogGlucoseModal from './components/LogGlucoseModal';
 import LogInsulinModal from './components/LogInsulinModal';
 import LogActivityModal from './components/LogActivityModal';
 import DoctorReportModal from './components/DoctorReportModal';
-import InteractiveCrossGrid from './components/background/InteractiveCrossGrid';
+import InteractiveClinicalGrid from './components/background/InteractiveClinicalGrid';
 import { ArrowRight, ChevronLeft, RotateCcw } from 'lucide-react';
 import Lenis from 'lenis';
 
@@ -168,21 +168,18 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden bg-[#F7F8F5] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
-      {/* 0. Subtle Medical Telemetry Interactive Cross Grid (z-0) */}
-      <InteractiveCrossGrid 
-        crossSize={5.5}
-        strokeWidth={1.1}
-        interactionRadius={130}
-        maxDisplacement={8}
-        springStrength={0.08}
-        damping={0.82}
-        baseOpacity={0.09}
-        activeColor="#075B57"
-        accentColor="#1E9E67"
-        enableRipple={true}
+    <div className="min-h-screen relative overflow-x-hidden bg-[#F7F8F4] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
+      {/* 0. Clinical Intelligence Interactive Cross Grid (+) sitting behind content */}
+      <InteractiveClinicalGrid 
+        crossSize={8.5}
+        strokeWidth={1.35}
+        spacing={68}
+        interactionRadius={140}
+        maxDisplacement={10}
+        springStrength={0.075}
+        damping={0.84}
+        enableParallax={true}
         enableConnections={true}
-        enableCursorGlow={true}
       />
 
       {/* ========================================================================= */}
