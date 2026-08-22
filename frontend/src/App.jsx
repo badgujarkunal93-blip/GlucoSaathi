@@ -91,13 +91,13 @@ function MainContent() {
     <div className="min-h-screen relative overflow-x-hidden bg-[#F7F8F5] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
       {/* 0. Subtle Medical Telemetry Interactive Cross Grid (Sits at z-0 behind content) */}
       <InteractiveCrossGrid 
-        crossSize={6}
-        strokeWidth={1.2}
-        interactionRadius={190}
-        maxDisplacement={18}
-        springStrength={0.055}
-        damping={0.88}
-        baseOpacity={0.12}
+        crossSize={5.5}
+        strokeWidth={1.1}
+        interactionRadius={130}
+        maxDisplacement={8}
+        springStrength={0.08}
+        damping={0.82}
+        baseOpacity={0.09}
         activeColor="#075B57"
         accentColor="#1E9E67"
         enableRipple={true}

@@ -14,13 +14,13 @@ import React, { useEffect, useRef } from 'react';
  * - 100% non-blocking (pointer-events: none, single RAF loop)
  */
 export default function InteractiveCrossGrid({
-  crossSize = 6,
-  strokeWidth = 1.2,
-  interactionRadius = 180,
-  maxDisplacement = 20,
-  springStrength = 0.055,
-  damping = 0.87,
-  baseOpacity = 0.12,
+  crossSize = 5.5,
+  strokeWidth = 1.1,
+  interactionRadius = 130,
+  maxDisplacement = 8,
+  springStrength = 0.08,
+  damping = 0.82,
+  baseOpacity = 0.10,
   activeColor = '#075B57', // Muted dark teal
   accentColor = '#1E9E67', // Clinical emerald
   enableRipple = true,
@@ -259,26 +259,26 @@ export default function InteractiveCrossGrid({
         // Repulsion force
         if (dist < interactionRadius && mouse.isActive) {
           const normDist = dist / interactionRadius;
-          const force = Math.pow(1 - normDist, 1.6);
+          const force = Math.pow(1 - normDist, 1.8);
           const push = force * maxDisplacement;
 
           const angle = Math.atan2(dy, dx);
           const pushX = Math.cos(angle) * push;
           const pushY = Math.sin(angle) * push;
 
-          // Apply velocity nudge away from cursor
-          c.vx += pushX * 0.25;
-          c.vy += pushY * 0.25;
+          // Apply gentle velocity nudge away from cursor
+          c.vx += pushX * 0.12;
+          c.vy += pushY * 0.12;
 
           // Interaction visuals
           c.activation = 1 - normDist;
-          targetAlpha = baseOpacity + c.activation * 0.32;
-          targetScale = 1 + c.activation * 0.38;
-          if (c.activation > 0.45) isAccent = true;
+          targetAlpha = baseOpacity + c.activation * 0.18;
+          targetScale = 1 + c.activation * 0.18;
+          if (c.activation > 0.55) isAccent = true;
 
           activeCrossesNearMouse.push(c);
         } else {
-          c.activation *= 0.92;
+          c.activation *= 0.88;
         }
 
         // Ripple interaction
@@ -289,13 +289,13 @@ export default function InteractiveCrossGrid({
           const rDist = Math.sqrt(rdx * rdx + rdy * rdy);
           const ringDist = Math.abs(rDist - rip.radius);
 
-          if (ringDist < 45) {
-            const ripForce = (1 - ringDist / 45) * rip.opacity;
+          if (ringDist < 35) {
+            const ripForce = (1 - ringDist / 35) * rip.opacity;
             const ripAngle = Math.atan2(rdy, rdx);
-            c.vx += Math.cos(ripAngle) * ripForce * 12;
-            c.vy += Math.sin(ripAngle) * ripForce * 12;
-            targetAlpha += ripForce * 0.25;
-            targetScale += ripForce * 0.2;
+            c.vx += Math.cos(ripAngle) * ripForce * 4.5;
+            c.vy += Math.sin(ripAngle) * ripForce * 4.5;
+            targetAlpha += ripForce * 0.15;
+            targetScale += ripForce * 0.12;
           }
         }
 
