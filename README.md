@@ -6,6 +6,7 @@
 [![Backend](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-063F3D?style=flat-square&logo=node.js)](https://expressjs.com/)
 [![ML Microservice](https://img.shields.io/badge/ML%20Service-Python%20%2B%20FastAPI-F2B84B?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Database](https://img.shields.io/badge/Nutrition%20DB-ICMR--NIN%20IFCT%202017-8D4023?style=flat-square)](https://www.nin.res.in/)
+[![Vercel Deployment](https://img.shields.io/badge/Deploy-Vercel%201--Click-000000?style=flat-square&logo=vercel)](https://vercel.com/)
 [![UN SDG 3](https://img.shields.io/badge/UN%20SDG%203-Good%20Health%20%26%20Well--Being-E23D28?style=flat-square)](https://sdgs.un.org/goals/goal3)
 
 > **Innovate 4 Impact: AI4SDG Global Hackathon 2026 — Problem Statement PS-102**  
@@ -19,112 +20,96 @@ Living with **Type 1 Diabetes (T1D)** in India requires navigating over **180 gl
 
 **GlucoSaathi** is an India-first clinical decision-support companion that bridges everyday Indian culinary realities with continuous glycemic safety. It extracts structured food components from natural language text or plate photos, resolves them deterministically against the **ICMR-NIN Indian Food Composition Tables (IFCT 2017)**, and forecasts near-term hypoglycemia risk ($30\text{--}45\text{ minutes}$ in advance) using a calibrated **LightGBM / Conformal Forecaster** microservice.
 
-All views, calculations, explanations, and summaries are governed by a **Single Source of Truth (`PatientState`)** reactive architecture, ensuring complete consistency across the entire application.
+---
+
+## 🧭 Application Architecture: Two Distinct Modes
+
+GlucoSaathi decouples the public-facing product introduction from the dense clinical assessment workflow:
+
+```text
+┌────────────────────────────────────────────────────────────┐
+│ 1. MARKETING / HERO FRONT DOOR (appMode: 'landing')        │
+│    Cinematic, Spacious, Conceptual Intelligence Visual     │
+└─────────────────────────────┬──────────────────────────────┘
+                              │ [ START ASSESSMENT ➔ ]
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│ 2. CLINICAL DECISION PIPELINE (appMode: 'assessment')       │
+│    01 INPUT ➔ 02 AI ANALYSIS ➔ 03 RISK ➔ 04 HEALTH ➔       │
+│    05 JOURNAL ➔ 06 DOCTOR REPORT ➔ SAVE & ARCHIVE          │
+└────────────────────────────────────────────────────────────┘
+                              │ [ Save & View Reports ➔ ]
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│ 3. SAVED REPORTS ARCHIVE (appMode: 'saved-reports')        │
+│    Inspect Historical Snapshots • Reassess • New Session   │
+└────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 🎯 Key Features
+## 🎯 Key Capabilities
 
-* **multimodal Indian Meal Understanding**: Natural language (Hindi/English text) and photo plate decomposition into structured ingredients and household portion units.
+* **Multimodal Indian Meal Understanding**: Natural language (Hindi/English text) and photo plate decomposition into structured ingredients and household portion units via Google Gemini 1.5 Flash.
 * **Authoritative Indian Nutrition (ICMR-NIN IFCT 2017)**: Strict deterministic macronutrient mapping with uncertainty ranges ($60\text{--}76\text{g}$) and glycemic index (GI) ratings.
-* **Interactive Portion Adjuster**: Live $\pm 0.5$ serving increment/decrement controls with instant client-side carbohydrate recalculation.
+* **Dynamic Multi-Factor Glucose Trajectory Engine**: Computes continuous time-series curves ($-60\text{m} \to \text{NOW} \to +30\text{m}$) using glucose momentum, active insulin (IOB) downward pressure, carb absorption kinetics, and physical activity modifiers.
+* **Real CGM & Simulated Baseline Support**: Renders actual sensor telemetry when CSV files are imported, or smooth mathematical baselines labeled *"Simulated trajectory — no CGM history uploaded"*.
 * **Calibrated Hypoglycemia Prediction ($P(\text{hypo} < 70)$)**: Gradient boosted tree classification with Platt scaling calibration trained on OhioT1DM and HUPA-UCM patient datasets.
-* **Conformal Glucose Forecaster**: Dynamic 30-minute interstitial trajectory with rigorous 90% uncertainty prediction interval ($\pm 22.8\text{ mg/dL}$).
+* **Prediction Uncertainty Interval**: Relabeled prototype prediction interval ($\pm 12\text{--}22\text{ mg/dL}$) with explicit clinical disclaimer notes.
 * **Explainable Physiological Reasoning**: Normalized factor attribution drivers (*Glucose Momentum*, *Active IOB*, *Exercise Uptake*, *Carb Absorption*).
 * **Clinical Rule of 15 Protocol**: Hardcoded emergency guardrail armed automatically whenever blood glucose $< 70\text{ mg/dL}$.
-* **Interactive Scenario Simulator**: Real-time parameter sandbox (Glucose, IOB, Carbs, Exercise, Timing) for instantaneous hackathon demonstration.
-* **Clinical Health Dashboard & Journal**: Information-dense Bento summary with Time-in-Range (TIR), mean glucose, and filterable telemetry logs.
-* **Endocrinologist Visit Summary**: Standardized clinical report with 1-click CSV telemetry export and print-ready summary.
+* **Complete Save Report $\to$ Saved Reports $\to$ Reassess Loop**: Persistent snapshot archiving with localStorage abstraction (`reportStorage.js`), individual record deletion, and pre-filled reassessments.
+* **Endocrinologist Visit Summary**: Standardized clinical report with 1-click CSV telemetry export and print-ready clinical PDF.
 
 ---
 
-## 🏗️ End-to-End System Architecture
+## 🏗️ End-to-End System Flow
 
 ```mermaid
-flowchart TB
-    subgraph UI_LAYER [Frontend Application - React 19 + Vite]
-        NAV[Healthcare Navigation Header]
-        OVERVIEW[Overview & Live Snapshot]
-        MEAL_UI[Meal Analyzer Workspace]
-        RISK_UI[Risk Prediction Sandbox]
-        DASH_UI[Health Dashboard]
-        JOURNAL_UI[Health Journal]
-        REPORT_UI[Doctor Report Modal]
-        STATE[Central PatientState Engine]
+flowchart TD
+    subgraph STAGE_00 [Product Front Door]
+        LP[Landing Page / Hero] -->|Click 'Start Assessment'| STAGE_01
     end
 
-    subgraph BACKEND_LAYER [Express REST API - Node.js]
-        API[Express Gateway :3001]
-        VAL[Zod Schema Validation]
-        MEAL_SRV[Meal Parsing Service]
-        CARB_SRV[Carb Estimation Service]
-        PRED_SRV[Prediction Proxy]
+    subgraph CLINICAL_PIPELINE [Sequential Decision-Support Pipeline]
+        STAGE_01[01 Patient Input<br/>Glucose, Trend, IOB, Meal, Activity] -->|Start Analysis| PROC[Live Pipeline Visualizer]
+        PROC --> STAGE_02[02 AI Meal Parsing<br/>ICMR-NIN IFCT 2017 Resolution]
+        STAGE_02 --> STAGE_03[03 Risk Check & Trajectory<br/>Calibrated LightGBM + Conformal Band]
+        STAGE_03 --> STAGE_04[04 Health Dashboard<br/>TIR %, Bento Glycemic Metrics]
+        STAGE_04 --> STAGE_05[05 Health Journal<br/>Longitudinal Timeline Log]
+        STAGE_05 --> STAGE_06[06 Doctor Report Modal<br/>Endocrinologist Clinical Summary]
     end
 
-    subgraph ML_LAYER [ML Microservice - Python FastAPI]
-        FASTAPI[FastAPI Service :8000]
-        FEAT[24-Signal Feature Engineering]
-        LGBM[Calibrated LightGBM Classifier]
-        CONF[Conformal Glucose Forecaster]
+    subgraph ARCHIVE_LAYER [Clinical Archive & Storage]
+        STAGE_06 -->|Save & View Reports| SAVED[Saved Reports Archive<br/>/saved-reports]
+        SAVED -->|View Snapshot| DETAIL[Read-Only Report Viewer]
+        SAVED -->|Reassess| STAGE_01
+        SAVED -->|Start New| LP
     end
-
-    subgraph DATA_LAYER [Knowledge & Storage]
-        IFCT[(ICMR-NIN IFCT 2017 DB)]
-        GEMINI[Google Gemini 1.5 Flash]
-        FIREBASE[(Firebase Firestore)]
-    end
-
-    NAV --> OVERVIEW & MEAL_UI & RISK_UI & DASH_UI & JOURNAL_UI & REPORT_UI
-    OVERVIEW & MEAL_UI & RISK_UI & DASH_UI & JOURNAL_UI & REPORT_UI <--> STATE
-    STATE <--> API
-    API --> VAL
-    VAL --> MEAL_SRV & CARB_SRV & PRED_SRV
-    MEAL_SRV <--> GEMINI
-    CARB_SRV <--> IFCT
-    PRED_SRV <--> FASTAPI
-    FASTAPI --> FEAT --> LGBM & CONF
-    API <--> FIREBASE
 ```
 
 ---
 
 ## 📱 Application Screens & Modules
 
-| Screen / Module | Primary Purpose | Key User Interactions |
+| Stage / Module | Primary Purpose | Key User Interactions |
 | :--- | :--- | :--- |
-| **01 Overview & Live Snapshot** | Editorial product landing page & live patient telemetry snapshot. | View live glucose, 30m outlook, meal carbs, separate hypo risk; jump to interactive demo. |
-| **02 Meal Analyzer** | Two-column Indian meal decomposition workspace. | Type natural Hindi/English text, pick meal photos, adjust portions ($\pm 0.5$), 1-click sync to patient state. |
-| **03 Risk Prediction Sandbox** | Explainable near-term risk reasoning & simulation. | Live parameter sliders, conformal trajectory chart, factor attribution weights, Rule of 15 emergency banner. |
+| **00 Product Landing Page** | Public front door with conceptual intelligence core & interactive coordinate grid. | Value narrative, problem overview, pipeline animation, `[Start Assessment ➔]`. |
+| **01 Patient Input** | Starting clinical workspace for telemetry and meal parameters. | Enter glucose, select trend, input IOB, describe meal, pick activity, load presets (Safe, IOB Caution, Hypo Alert). |
+| **02 AI Meal Analysis** | Indian meal decomposition & IFCT 2017 lookup. | Multimodal extraction, portion adjustments ($\pm 0.5$), macronutrient uncertainty bands ($60\text{--}76\text{g}$). |
+| **03 Risk & Trajectory** | Dynamic 90-minute time-series & explainable risk engine. | Interactive SVG trajectory ($-60\text{m} \to \text{NOW} \to +30\text{m}$), parameter sliders, factor attribution bars, Rule of 15 banner. |
 | **04 Health Dashboard** | Clinical Bento dashboard displaying comprehensive glycemic metrics. | Time-In-Range (TIR 82%), Average BG, recent meals, active IOB, quick glucose logging. |
 | **05 Health Journal** | Longitudinal categorized telemetry log. | Filter events by Meals, Fingerstick Glucose, Risk Checks, Physical Activity. |
-| **06 Doctor Report Modal** | Standardized clinical visit summary. | Review GMI, TIR, TAR, TBR, meal frequency; export 1-click CSV or print clinical PDF. |
+| **06 Doctor Report** | Standardized clinical visit summary. | Review GMI, TIR, TAR, TBR, meal frequency; export 1-click CSV, print PDF, or `Save & View Reports`. |
+| **Saved Reports Archive** | Historical assessment snapshot manager. | Inspect historical reports, delete entries, or click `Reassess →` to start a new assessment with saved values. |
 
 ---
 
-## 💻 Tech Stack & Dependencies
-
-| Layer | Technology | Version | Purpose |
-| :--- | :--- | :--- | :--- |
-| **Frontend** | React | `^19.0.0` | Reactive UI framework with central state derivation |
-| **Build Tooling** | Vite | `^8.2.1` | Instant HMR and fast production bundle (198ms) |
-| **Styling** | Tailwind CSS | `^4.0.0` | Custom editorial healthcare design tokens |
-| **Icons** | Lucide React | `^1.16.0` | Consistent medical and operational icons |
-| **Charts** | Recharts & SVG | `^2.15.0` | Glycemic curves and conformal uncertainty bands |
-| **Backend API** | Node.js / Express | `^4.21.0` | Express REST API gateway and Zod payload validation |
-| **ML Service** | Python / FastAPI | `3.14 / 0.115` | Real-time ML inference & feature synthesis |
-| **ML Engine** | LightGBM & scikit-learn | `4.5 / 1.6` | Platt-calibrated ensemble trees on OhioT1DM dataset |
-| **LLM Vision/NLP**| Google Gemini 1.5 Flash | v1beta | Structured JSON food entity extraction |
-| **Nutrition DB** | ICMR-NIN IFCT 2017 | National Institute of Nutrition | Authoritative Indian macronutrient reference (60+ composite foods) |
-| **Testing** | Vitest & Pytest | `Vitest 3.2 / Pytest 9.1` | 19 Vitest tests + 7 Pytest ML tests passing |
-
----
-
-## 🚀 Getting Started Locally
+## 🚀 Quick Start & Installation
 
 ### Prerequisites
-* **Node.js**: v18.0.0 or higher
-* **Python**: v3.10 or higher (Python 3.14 supported)
-* **npm**: v9.0.0 or higher
+* **Node.js**: v18.0 or higher
+* **Python**: v3.11+ (for Python FastAPI ML microservice)
 
 ### 1. Clone the Repository
 ```bash
@@ -132,138 +117,74 @@ git clone https://github.com/badgujarkunal93-blip/GlucoSaathi.git
 cd GlucoSaathi
 ```
 
-### 2. Install Node Dependencies
+### 2. Install Dependencies
 ```bash
+# Install root and workspace dependencies
 npm install
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
 ```
 
-### 3. Setup Python Virtual Environment (ML Service)
+### 3. Run Development Servers
+
+**Option A: Run Full Stack (Frontend + Python FastAPI ML Microservice)**
 ```bash
-cd ml
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cd ..
-```
-
-### 4. Configure Environment Variables
-Copy the template `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-*(Note: GlucoSaathi runs completely offline with full local ICMR-NIN database and local regex parsing even without API keys!)*
-
-### 5. Run the Application
-Run all services concurrently:
-```bash
-# Terminal 1: Frontend (Vite Dev Server on http://localhost:5173)
-npm run dev
-
-# Terminal 2: Backend API (Express on http://localhost:3001)
-npm run dev:backend
-
-# Terminal 3: ML Microservice (FastAPI on http://localhost:8000)
+# Terminal 1: Python FastAPI ML Service (Port 8000)
 npm run dev:ml
+
+# Terminal 2: Vite React Frontend (Port 5173)
+npm run dev
 ```
 
-### 6. Run Test Suites
+**Option B: Run Frontend Only (with Built-In Deterministic Fallback Engine)**
 ```bash
-# Run JavaScript / Frontend & State Sync Unit Tests (Vitest)
+npm run dev
+```
+*Note: GlucoSaathi includes a resilient client-side fallback engine. If the Python ML microservice is not running, all ICMR-NIN calculations, dynamic trajectories, and risk scoring execute client-side transparently.*
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run Vitest Frontend & Storage Test Suite (28 Tests)
 npm test
 
-# Run Python ML Pipeline & API Tests (Pytest)
+# Run Pytest Python ML Microservice Test Suite (7 Tests)
 npm run test:ml
-```
 
-### 7. Production Build
-```bash
-npm run build
-```
-
----
-
-## 📁 Repository Structure
-
-```
-GlucoSaathi/
-├── DETAILED_REPORT.md                 # Full 15-page submission-grade technical report
-├── README.md                          # Project documentation & setup guide
-├── package.json                       # Workspace configuration & scripts
-├── vitest.config.js                   # Vitest configuration
-├── .env.example                       # Environment variables template
-│
-├── frontend/                          # React 19 + Vite + Tailwind 4 Frontend
-│   ├── public/
-│   │   └── favicon.svg                # Custom GlucoSaathi SVG favicon
-│   ├── src/
-│   │   ├── context/
-│   │   │   └── AppContext.jsx         # Single Source of Truth PatientState Engine
-│   │   ├── components/
-│   │   │   ├── Overview.jsx           # 10-section editorial landing page & simulator
-│   │   │   ├── LogMeal.jsx            # Two-column Indian meal analyzer
-│   │   │   ├── RiskCheck.jsx          # Explainable risk prediction sandbox
-│   │   │   ├── Dashboard.jsx          # Clinical Bento health dashboard
-│   │   │   ├── History.jsx            # Synchronized Health Journal
-│   │   │   ├── DoctorReportModal.jsx  # Endocrinologist visit summary & export
-│   │   │   ├── CGMTrajectory.jsx      # Dynamic CGM chart with conformal bands
-│   │   │   └── layout/
-│   │   │       ├── Navbar.jsx         # Healthcare header navigation
-│   │   │       └── Footer.jsx         # Clinical footer & references
-│   │   ├── lib/
-│   │   │   ├── carb/carbEstimator.js  # ICMR-NIN IFCT 2017 carbohydrate engine
-│   │   │   ├── risk/riskEngine.js     # Deterministic safety rule engine
-│   │   │   └── ai/mealParser.js       # Gemini 1.5 Flash structured parser
-│   │   └── data/
-│   │       └── indianFoods.json       # Normalized IFCT 2017 database
-│   └── package.json
-│
-├── backend/                           # Express.js Application Server
-│   ├── src/
-│   │   ├── server.js                  # Express API gateway (Port 3001)
-│   │   ├── routes/                    # API endpoints (/meals, /glucose, /predictions, /reports)
-│   │   └── validators/schemas.js      # Zod validation schemas
-│   └── package.json
-│
-├── ml/                                # Python ML Microservice (FastAPI)
-│   ├── src/
-│   │   ├── service/api.py             # FastAPI prediction endpoints (Port 8000)
-│   │   ├── features/glucose.py        # 24-dimensional feature extraction
-│   │   └── training/train_pipeline.py # Model training & conformal calibration
-│   ├── models/production/             # Serialized LightGBM models & metadata
-│   ├── tests/                         # Pytest test suite
-│   └── requirements.txt
-│
-├── data/                              # Authoritative Nutrition & Benchmark Datasets
-│   └── indianFoods.json               # 60+ dishes & composite meal definitions
-│
-├── docs/                              # Technical & Clinical Documentation
-│   ├── MODEL_CARD.md                  # Detailed ML Model Card & Evaluation
-│   ├── CLINICAL_PROBLEM.md            # Clinical taxonomy & problem definition
-│   └── DATA_GOVERNANCE.md             # Security & privacy standards
-│
-└── tests/                             # Vitest Automated Test Suite (19 tests)
-    ├── stateSync.test.js              # Single-state derivation & acceptance tests
-    ├── carbEstimator.test.js          # IFCT carbohydrate calculation tests
-    ├── riskEngine.test.js             # Clinical Rule of 15 & threshold tests
-    └── schemas.test.js                # Zod schema validation tests
+# Validate Production Build
+cd frontend && npm run build
 ```
 
 ---
 
-## 📄 Complete Detailed Technical Report
+## ☁️ Deployment on Vercel
 
-For the in-depth 15-page hackathon submission report covering the clinical problem formulation, OhioT1DM/HUPA-UCM benchmark evaluation, Clarke Error Grid analyses, data governance, and future clinical trial roadmap:
+The repository includes pre-configured `vercel.json` and `frontend/vercel.json` files for 1-click zero-configuration deployment:
 
-👉 **[Read the Complete Detailed Technical Report (DETAILED_REPORT.md)](./DETAILED_REPORT.md)**
-
----
-
-## 🛡️ Medical Safety Disclaimer
-
-> **Medical Notice**: GlucoSaathi is an investigational clinical decision-support prototype developed for research and demonstration during the AI4SDG Global Hackathon 2026. It is **NOT an autonomous insulin delivery device**, does not prescribe medication, and does not replace regular self-monitoring of blood glucose (SMBG) or direct consultations with an endocrinologist. All carbohydrate counts and risk estimates are for reference and must be confirmed with your prescribed diabetes management plan.
+1. Import `badgujarkunal93-blip/GlucoSaathi` on **[vercel.com](https://vercel.com)**.
+2. Set **Root Directory** to `frontend`.
+3. Click **Deploy**.
 
 ---
 
-## 📜 License
+## 📜 Scientific Evidence & References
 
-This project is developed under the **MIT License** for open-source AI innovation supporting UN Sustainable Development Goal 3. Nutrition data sourced from **ICMR-NIN Indian Food Composition Tables (IFCT 2017)**.
+* **ICMR-NIN (2017)**: *Indian Food Composition Tables (IFCT)*, National Institute of Nutrition, Indian Council of Medical Research.
+* **OhioT1DM Dataset**: *OhioT1DM Dataset for Blood Glucose Level Prediction*, Marling & Bunescu, KDH Workshop.
+* **HUPA-UCM Cohort**: *Hospital Universitario de La Princesa Type 1 Diabetes Dataset*, Contreras et al.
+* **Clinical Rule of 15**: American Diabetes Association (ADA) Standards of Care in Diabetes (Hypoglycemia Management Protocol).
+
+---
+
+## ⚖️ Clinical Disclaimer
+
+> **INVESTIGATIONAL PROTOTYPE**: GlucoSaathi is an educational and clinical decision-support research prototype built for the **AI4SDG Global Hackathon 2026**. It does **not** autonomously prescribe, alter, or administer insulin dosages. All insulin adjustments must be reviewed and confirmed by a certified endocrinologist or treating physician.
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
