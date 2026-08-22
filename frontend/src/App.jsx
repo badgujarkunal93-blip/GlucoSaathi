@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import StagePatientInput from './components/pipeline/StagePatientInput';
+import PipelineProcessingView from './components/pipeline/PipelineProcessingView';
 import Overview from './components/Overview';
 import Dashboard from './components/Dashboard';
 import LogMeal from './components/LogMeal';
@@ -16,12 +18,18 @@ import LogInsulinModal from './components/LogInsulinModal';
 import LogActivityModal from './components/LogActivityModal';
 import DoctorReportModal from './components/DoctorReportModal';
 import InteractiveCrossGrid from './components/background/InteractiveCrossGrid';
+import { ArrowRight, RotateCcw } from 'lucide-react';
 import Lenis from 'lenis';
 
 function MainContent() {
   const { 
-    currentView, 
-    navigateTo,
+    pipelineStep,
+    setPipelineStep,
+    pipelineStatus,
+    pipelineError,
+    startAnalysis,
+    resetAnalysis,
+    unlockedStages,
     isSettingsOpen,
     setIsSettingsOpen,
     isGlucoseModalOpen, 
@@ -37,8 +45,6 @@ function MainContent() {
     isUserProfileOpen,
     setIsUserProfileOpen
   } = useApp();
-
-  const [activeTab, setActiveTab] = useState('overview');
 
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
@@ -59,31 +65,100 @@ function MainContent() {
     };
   }, []);
 
-  // Sync context navigation with activeTab
-  const handleTabSwitch = (tab) => {
-    setActiveTab(tab);
-    if (tab === 'meal') navigateTo('log-meal');
-    else if (tab === 'risk') navigateTo('risk-check');
-    else if (tab === 'dashboard') navigateTo('dashboard');
-    else if (tab === 'journal') navigateTo('history');
-    else navigateTo('overview');
+  const handleNavigate = (step) => {
+    setPipelineStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderActiveView = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <Overview onNavigate={handleTabSwitch} />;
-      case 'meal':
-        return <LogMeal onNavigate={handleTabSwitch} />;
+    if (pipelineStep === 'processing') {
+      return (
+        <PipelineProcessingView 
+          pipelineStatus={pipelineStatus}
+          error={pipelineError}
+          onRetry={() => startAnalysis()}
+          onComplete={() => handleNavigate('risk')}
+        />
+      );
+    }
+
+    switch (pipelineStep) {
+      case 'input':
+        return <StagePatientInput />;
+      case 'analysis':
+        return (
+          <div className="space-y-8">
+            <LogMeal onNavigate={handleNavigate} />
+            <div className="p-4 rounded-2xl bg-white border border-black/8 shadow-xs flex items-center justify-between">
+              <span className="text-xs font-bold text-[#063F3D]">
+                Step 02 of 06 Complete: Meal Carbohydrates Resolved
+              </span>
+              <button
+                onClick={() => handleNavigate('risk')}
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+              >
+                <span>Proceed to Risk Prediction</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        );
       case 'risk':
-        return <RiskCheck onNavigate={handleTabSwitch} />;
+        return (
+          <div className="space-y-8">
+            <RiskCheck onNavigate={handleNavigate} />
+            <div className="p-4 rounded-2xl bg-white border border-black/8 shadow-xs flex items-center justify-between">
+              <span className="text-xs font-bold text-[#063F3D]">
+                Step 03 of 06 Complete: Near-Term Hypoglycemia Risk Predicted
+              </span>
+              <button
+                onClick={() => handleNavigate('dashboard')}
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+              >
+                <span>Proceed to Health Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        );
       case 'dashboard':
-        return <Dashboard onNavigate={handleTabSwitch} />;
+        return (
+          <div className="space-y-8">
+            <Dashboard onNavigate={handleNavigate} />
+            <div className="p-4 rounded-2xl bg-white border border-black/8 shadow-xs flex items-center justify-between">
+              <span className="text-xs font-bold text-[#063F3D]">
+                Step 04 of 06 Complete: Health Trends Synthesized
+              </span>
+              <button
+                onClick={() => handleNavigate('journal')}
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+              >
+                <span>Proceed to Health Journal</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        );
       case 'journal':
-        return <History onNavigate={handleTabSwitch} />;
+        return (
+          <div className="space-y-8">
+            <History onNavigate={handleNavigate} />
+            <div className="p-4 rounded-2xl bg-white border border-black/8 shadow-xs flex items-center justify-between">
+              <span className="text-xs font-bold text-[#063F3D]">
+                Step 05 of 06 Complete: Longitudinal Timeline Updated
+              </span>
+              <button
+                onClick={() => setIsDoctorReportModalOpen(true)}
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+              >
+                <span>Generate Doctor Report</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        );
       default:
-        return <Overview onNavigate={handleTabSwitch} />;
+        return <StagePatientInput />;
     }
   };
 
@@ -105,10 +180,8 @@ function MainContent() {
         enableCursorGlow={true}
       />
 
-      {/* 1. Professional Healthcare Top Header (z-50) */}
+      {/* 1. Sequential Pipeline Stepper Top Header (z-50) */}
       <Navbar 
-        activeTab={activeTab} 
-        setActiveTab={handleTabSwitch}
         onOpenDoctorReport={() => setIsDoctorReportModalOpen(true)}
         onOpenSettings={() => setIsUserProfileOpen(true)}
       />
@@ -120,12 +193,12 @@ function MainContent() {
 
       {/* 3. Responsive Mobile Bottom Navigation */}
       <BottomNav 
-        activeTab={activeTab} 
-        setActiveTab={handleTabSwitch} 
+        activeTab={pipelineStep} 
+        setActiveTab={handleNavigate} 
       />
 
       {/* 4. Editorial Application Footer */}
-      <Footer onNavigate={handleTabSwitch} />
+      <Footer onNavigate={handleNavigate} />
 
       {/* 5. Clinical Modals & Drawers */}
       <UserProfileModal 

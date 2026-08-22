@@ -7,41 +7,55 @@ import {
   LayoutDashboard, 
   FileText, 
   User, 
-  Zap, 
   Menu, 
   X,
   AlertOctagon,
   Sparkles,
   BookOpen,
   UploadCloud,
-  Cpu
+  Cpu,
+  Lock,
+  Check,
+  RotateCcw
 } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, onOpenSettings }) {
+export default function Navbar({ onOpenDoctorReport, onOpenSettings }) {
   const { 
-    currentPersona, 
-    switchPersona, 
-    DEMO_PERSONAS, 
     patientState,
     mlStatus,
     dataMode,
     setDataMode,
     setIsCSVImportOpen,
-    setIsUserProfileOpen
+    setIsUserProfileOpen,
+    pipelineStep,
+    setPipelineStep,
+    unlockedStages,
+    resetAnalysis,
+    pipelineStatus
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Sparkles },
-    { id: 'meal', label: 'Meal Analyzer', icon: Utensils },
-    { id: 'risk', label: 'Risk Prediction', icon: ShieldCheck },
-    { id: 'dashboard', label: 'Health Dashboard', icon: LayoutDashboard },
-    { id: 'journal', label: 'Health Journal', icon: BookOpen },
-    { id: 'report', label: 'Doctor Report', icon: FileText },
+  const pipelineStages = [
+    { id: 'input', label: '01 Input', fullLabel: 'Patient Input', icon: Activity },
+    { id: 'analysis', label: '02 AI Analysis', fullLabel: 'Meal & Nutrition', icon: Utensils },
+    { id: 'risk', label: '03 Risk', fullLabel: 'Risk Prediction', icon: ShieldCheck },
+    { id: 'dashboard', label: '04 Health', fullLabel: 'Health Dashboard', icon: LayoutDashboard },
+    { id: 'journal', label: '05 Journal', fullLabel: 'Health Journal', icon: BookOpen },
+    { id: 'report', label: '06 Report', fullLabel: 'Doctor Report', icon: FileText },
   ];
 
   const isEmergency = patientState.glucose < 70 || patientState.isEmergencyHypo;
+  const isCompleted = unlockedStages.length > 1 && pipelineStatus === 'COMPLETE';
+
+  const handleStageClick = (stageId) => {
+    if (!unlockedStages.includes(stageId)) return;
+    if (stageId === 'report') {
+      onOpenDoctorReport();
+    } else {
+      setPipelineStep(stageId);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-[#F7F8F5]/95 backdrop-blur-md border-b border-black/8 shadow-xs">
@@ -50,7 +64,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
           
           {/* 1. Left: Brand Identity */}
           <div 
-            onClick={() => setActiveTab('overview')}
+            onClick={() => setPipelineStep('input')}
             className="flex items-center space-x-3 cursor-pointer group shrink-0"
           >
             <div className="w-9 h-9 rounded-xl bg-[#075B57] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
@@ -66,42 +80,62 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
                 </span>
               </div>
               <span className="text-[10px] font-bold text-[#075B57] tracking-wider uppercase">
-                T1D Clinical Decision Support
+                Clinical Decision Pipeline
               </span>
             </div>
           </div>
 
-          {/* 2. Center: Desktop Tab Navigation */}
+          {/* 2. Center: Sequential Pipeline Stepper */}
           <nav className="hidden lg:flex items-center space-x-1 bg-[#F3F1EA] p-1 rounded-xl border border-black/5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
+            {pipelineStages.map((stage, idx) => {
+              const isUnlocked = unlockedStages.includes(stage.id);
+              const isActive = pipelineStep === stage.id;
+              const isDone = isUnlocked && pipelineStep !== stage.id && pipelineStatus === 'COMPLETE';
+
               return (
                 <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.id === 'report') {
-                      onOpenDoctorReport();
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                  }}
+                  key={stage.id}
+                  onClick={() => handleStageClick(stage.id)}
+                  disabled={!isUnlocked}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
                     isActive
-                      ? 'bg-white text-[#075B57] shadow-xs font-extrabold'
-                      : 'text-[#66716F] hover:text-[#111817] hover:bg-white/60'
+                      ? 'bg-white text-[#075B57] shadow-xs font-extrabold ring-1 ring-[#075B57]/15'
+                      : isUnlocked
+                        ? 'text-[#063F3D] hover:bg-white/60 cursor-pointer'
+                        : 'text-[#66716F]/50 cursor-not-allowed opacity-60'
                   }`}
+                  title={!isUnlocked ? 'Stage locked — complete previous steps first' : stage.fullLabel}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#1E9E67]' : 'text-[#66716F]'}`} />
-                  <span>{item.label}</span>
+                  {isDone ? (
+                    <span className="w-4 h-4 rounded-full bg-[#1E9E67]/20 text-[#1E9E67] flex items-center justify-center text-[10px] font-black">
+                      ✓
+                    </span>
+                  ) : !isUnlocked ? (
+                    <Lock className="w-3 h-3 text-[#66716F]/40" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#075B57]" />
+                  )}
+                  <span>{stage.label}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* 3. Right: AI Model Status, Data Mode & Emergency Status */}
+          {/* 3. Right: AI Model Status, New Analysis & Settings */}
           <div className="hidden sm:flex items-center space-x-2 shrink-0">
             
+            {/* Reset / New Analysis Button when pipeline is complete */}
+            {isCompleted && (
+              <button
+                onClick={resetAnalysis}
+                className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#F3F1EA] border border-black/10 text-xs font-bold text-[#063F3D] flex items-center space-x-1 transition-all shadow-xs"
+                title="Start New Patient Analysis"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#075B57]" />
+                <span className="hidden xl:inline">New Analysis</span>
+              </button>
+            )}
+
             {/* Live Model Connection Indicator */}
             <div 
               className={`px-2 py-1 rounded-lg border text-[11px] font-bold flex items-center space-x-1.5 transition-all ${
@@ -109,60 +143,13 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
                   ? 'bg-[#DFF4E8] text-[#075B57] border-[#B8E8D2]'
                   : 'bg-[#FEF7E6] text-[#8D4023] border-[#FFE280]'
               }`}
-              title={mlStatus === 'online' ? 'Python FastAPI LightGBM Service Connected' : 'Local Deterministic Safety Engine Running'}
+              title={mlStatus === 'online' ? 'Python FastAPI LightGBM Service Connected' : 'Local Deterministic Engine Running'}
             >
               <Cpu className="w-3.5 h-3.5" />
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: mlStatus === 'online' ? '#1E9E67' : '#F2B84B' }} />
               <span className="hidden xl:inline">
                 {mlStatus === 'online' ? 'AI Model Online' : 'Local Engine'}
               </span>
-            </div>
-
-            {/* CSV Import Trigger */}
-            <button
-              onClick={() => setIsCSVImportOpen(true)}
-              className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#F3F1EA] border border-black/10 text-xs font-bold text-[#063F3D] flex items-center space-x-1 transition-all shadow-xs"
-              title="Import Glucose CSV"
-            >
-              <UploadCloud className="w-3.5 h-3.5 text-[#075B57]" />
-              <span className="hidden xl:inline">Import CSV</span>
-            </button>
-
-            {/* Live Hypo Alert Badge if < 70 */}
-            {isEmergency ? (
-              <div className="px-2.5 py-1 rounded-lg bg-[#FDE8E9] border border-[#FFB4A8] text-[#C84B52] text-[11px] font-black flex items-center space-x-1 animate-pulse">
-                <AlertOctagon className="w-3.5 h-3.5" />
-                <span>HYPO &lt;70</span>
-              </div>
-            ) : (
-              <div className="px-2.5 py-1 rounded-lg bg-[#DFF4E8] text-[#075B57] text-[11px] font-bold flex items-center space-x-1">
-                <span>{patientState.glucose} mg/dL</span>
-              </div>
-            )}
-
-            {/* Data Mode & Scenario Selector */}
-            <div className="flex items-center bg-[#F3F1EA] rounded-xl p-0.5 border border-black/5">
-              <select
-                value={dataMode === 'my_data' ? 'my_data' : currentPersona.id}
-                onChange={(e) => {
-                  if (e.target.value === 'my_data') {
-                    setDataMode('my_data');
-                  } else {
-                    setDataMode('demo_scenario');
-                    switchPersona(e.target.value);
-                  }
-                }}
-                className="bg-white border-0 rounded-lg px-2.5 py-1 text-xs font-bold text-[#075B57] focus:outline-none cursor-pointer shadow-xs"
-              >
-                <option value="my_data">● My Live Data</option>
-                <optgroup label="Demo Scenarios (Judges)">
-                  {DEMO_PERSONAS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      Demo: {p.name.split(' ')[0]} ({p.age}y - {p.id === 'aarav' ? 'Adult' : p.id === 'priya' ? 'Student' : 'NPH'})
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
             </div>
 
             {/* Profile Settings Trigger */}
@@ -180,7 +167,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl bg-white border border-black/10 text-[#075B57]"
-              aria-label="Toggle navigation"
+              aria-label="Toggle pipeline menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -191,54 +178,41 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-black/8 bg-white p-4 shadow-lg animate-fade-in space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.id === 'report') {
-                      onOpenDoctorReport();
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`p-2.5 rounded-xl text-left text-xs font-bold flex items-center space-x-2 ${
-                    isActive ? 'bg-[#DFF4E8] text-[#075B57]' : 'bg-[#F7F8F5] text-[#66716F]'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          <div className="space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#66716F] block pb-1">
+              Decision-Support Pipeline Stages
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              {pipelineStages.map((stage) => {
+                const isUnlocked = unlockedStages.includes(stage.id);
+                const isActive = pipelineStep === stage.id;
 
-          <div className="pt-3 border-t border-black/5 flex items-center justify-between">
-            <button
-              onClick={() => {
-                setIsCSVImportOpen(true);
-                setMobileMenuOpen(false);
-              }}
-              className="text-xs font-bold text-[#075B57] flex items-center space-x-1"
-            >
-              <UploadCloud className="w-3.5 h-3.5" />
-              <span>Import CSV</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setIsUserProfileOpen(true);
-                setMobileMenuOpen(false);
-              }}
-              className="text-xs font-bold text-[#075B57] flex items-center space-x-1"
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>My Profile</span>
-            </button>
+                return (
+                  <button
+                    key={stage.id}
+                    disabled={!isUnlocked}
+                    onClick={() => {
+                      handleStageClick(stage.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`p-2.5 rounded-xl text-left text-xs font-bold flex items-center space-x-2 ${
+                      isActive 
+                        ? 'bg-[#DFF4E8] text-[#075B57] font-extrabold' 
+                        : isUnlocked
+                          ? 'bg-[#F7F8F5] text-[#063F3D]'
+                          : 'bg-[#F7F8F5]/50 text-[#66716F]/40 cursor-not-allowed'
+                    }`}
+                  >
+                    {!isUnlocked ? (
+                      <Lock className="w-3.5 h-3.5 text-[#66716F]/40" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5 text-[#1E9E67]" />
+                    )}
+                    <span>{stage.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

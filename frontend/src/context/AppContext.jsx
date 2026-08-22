@@ -94,50 +94,19 @@ const DEFAULT_USER_PROFILE = {
   preferredUnits: 'mg/dL'
 };
 
-const INITIAL_HISTORY = [
-  {
-    id: 'rc-1',
-    type: 'risk-check',
-    timestamp: '9:05 AM',
-    dayGroup: 'Today',
-    title: 'Morning Hypo Risk Check',
-    riskLevel: 'LOW',
-    glucose: 108,
-    insulinOnBoard: 0.8,
-    calculatedDose: 4.5,
-    summary: 'Safe glucose trajectory and manageable active insulin on board.',
-    timeAgo: '15 min ago'
-  },
-  {
-    id: 'meal-1',
-    type: 'meal',
-    timestamp: '8:42 AM',
-    dayGroup: 'Today',
-    title: 'Breakfast',
-    description: '2 rotis, dal tadka and steamed rice',
-    carbs: 68,
-    confidence: 'High',
-    items: [
-      { name: 'Whole Wheat Roti', quantity: 2, carbs: 30, unit: 'piece', icon: '🫓' },
-      { name: 'Dal Tadka', quantity: 1, carbs: 18, unit: 'bowl', icon: '🍲' },
-      { name: 'Steamed Rice', quantity: 1, carbs: 20, unit: 'bowl', icon: '🍚' }
-    ]
-  },
-  {
-    id: 'glu-1',
-    type: 'glucose',
-    timestamp: '8:30 AM',
-    dayGroup: 'Today',
-    title: 'Fasting Fingerstick Check',
-    value: 108,
-    unit: 'mg/dL',
-    trend: 'stable'
-  }
-];
-
 export function AppProvider({ children }) {
-  // Navigation View State: 'overview' | 'meal' | 'risk' | 'dashboard' | 'journal' | 'report'
-  const [currentView, setCurrentView] = useState('overview');
+  // =========================================================================
+  // PIPELINE STATE MACHINE & PROGRESSION
+  // =========================================================================
+  // pipelineStep: 'input' | 'processing' | 'analysis' | 'risk' | 'dashboard' | 'journal' | 'report'
+  const [pipelineStep, setPipelineStep] = useState('input');
+  
+  // pipelineStatus: 'IDLE' | 'VALIDATING' | 'ANALYZING' | 'PREDICTING_RISK' | 'GENERATING_DASHBOARD' | 'GENERATING_JOURNAL' | 'GENERATING_REPORT' | 'COMPLETE' | 'ERROR'
+  const [pipelineStatus, setPipelineStatus] = useState('IDLE');
+  const [pipelineError, setPipelineError] = useState(null);
+
+  // Unlocked Stages set: initial state unlocks ONLY 'input'
+  const [unlockedStages, setUnlockedStages] = useState(['input']);
 
   // Modals state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -193,13 +162,8 @@ export function AppProvider({ children }) {
   const [asyncMLResult, setAsyncMLResult] = useState(null);
 
   // History & Journal logs
-  const [history, setHistory] = useState(INITIAL_HISTORY);
-  const [glucoseLogs, setGlucoseLogs] = useState([
-    { id: 'g1', value: 108, recordedAt: '2026-08-22T08:30:00Z', mealRelation: 'fasting' },
-    { id: 'g2', value: 135, recordedAt: '2026-08-21T20:30:00Z', mealRelation: 'post_meal' },
-    { id: 'g3', value: 112, recordedAt: '2026-08-21T14:00:00Z', mealRelation: 'post_meal' },
-    { id: 'g4', value: 94, recordedAt: '2026-08-21T08:15:00Z', mealRelation: 'fasting' }
-  ]);
+  const [history, setHistory] = useState([]);
+  const [glucoseLogs, setGlucoseLogs] = useState([]);
 
   // Active Meal State
   const [activeMeal, setActiveMeal] = useState({
@@ -226,39 +190,139 @@ export function AppProvider({ children }) {
   }, []);
 
   // Async query to FastAPI ML Microservice whenever patient inputs change
-  useEffect(() => {
-    let isMounted = true;
-    const g = Number(patientInputs.glucose) || 108;
-    const iob = Number(patientInputs.insulinOnBoard) || 0;
-    const carbs = Number(patientInputs.carbsConsumed) || 68;
-    const activity = patientInputs.activityLevel || 'Light';
-    const trend = patientInputs.glucoseTrend || 'falling_slowly';
+  const runMLInference = useCallback(async (inputs) => {
+    const g = Number(inputs.glucose) || 108;
+    const iob = Number(inputs.insulinOnBoard) || 0;
+    const carbs = Number(inputs.carbsConsumed) || 68;
+    const activity = inputs.activityLevel || 'Light';
+    const trend = inputs.glucoseTrend || 'falling_slowly';
     const roc = trend === 'falling_rapidly' ? -2.2 : trend.includes('falling') ? -1.2 : trend.includes('rising') ? 1.5 : 0.0;
 
-    Promise.all([
-      mlClient.predictHypoRisk({ glucose: g, glucoseRoc: roc, iob, carbs, activityLevel: activity }),
-      mlClient.predictGlucoseForecast({ glucose: g, glucoseRoc: roc, iob, carbs, steps: activity === 'Intense' ? 2500 : 800 })
-    ]).then(([riskRes, forecastRes]) => {
-      if (isMounted) {
-        setMlStatus(riskRes.success ? 'online' : 'offline');
-        setAsyncMLResult({
-          probability: riskRes.probability,
-          riskScore: riskRes.riskScore,
-          riskLevel: riskRes.riskLevel,
-          isRuleOf15Armed: riskRes.isRuleOf15Armed,
-          explainability: riskRes.explainability,
-          predictedGlucose: forecastRes.predictedGlucose,
-          conformalLower: forecastRes.intervalLower,
-          conformalUpper: forecastRes.intervalUpper,
-          mlSource: riskRes.source
-        });
-      }
-    }).catch(() => {
-      if (isMounted) setMlStatus('offline');
-    });
+    try {
+      const [riskRes, forecastRes] = await Promise.all([
+        mlClient.predictHypoRisk({ glucose: g, glucoseRoc: roc, iob, carbs, activityLevel: activity }),
+        mlClient.predictGlucoseForecast({ glucose: g, glucoseRoc: roc, iob, carbs, steps: activity === 'Intense' ? 2500 : 800 })
+      ]);
 
-    return () => { isMounted = false; };
-  }, [patientInputs]);
+      setMlStatus(riskRes.success ? 'online' : 'offline');
+      const mlData = {
+        probability: riskRes.probability,
+        riskScore: riskRes.riskScore,
+        riskLevel: riskRes.riskLevel,
+        isRuleOf15Armed: riskRes.isRuleOf15Armed,
+        explainability: riskRes.explainability,
+        predictedGlucose: forecastRes.predictedGlucose,
+        conformalLower: forecastRes.intervalLower,
+        conformalUpper: forecastRes.intervalUpper,
+        mlSource: riskRes.source
+      };
+      setAsyncMLResult(mlData);
+      return mlData;
+    } catch {
+      setMlStatus('offline');
+      return null;
+    }
+  }, []);
+
+  // =========================================================================
+  // START ANALYSIS PIPELINE EXECUTION ACTION
+  // =========================================================================
+  const startAnalysis = async (submittedInputs) => {
+    setPipelineError(null);
+    setPipelineStep('processing');
+    setPipelineStatus('VALIDATING');
+
+    const activeInputs = submittedInputs || patientInputs;
+    setPatientInputs(activeInputs);
+
+    try {
+      // Step 1: Validation (~400ms)
+      await new Promise(r => setTimeout(r, 450));
+      setPipelineStatus('ANALYZING');
+
+      // Step 2: AI Meal Parsing / IFCT (~500ms)
+      const mealCarbs = Number(activeInputs.carbsConsumed) || 60;
+      setActiveMeal({
+        description: activeInputs.mealDescription || 'Custom Indian Meal',
+        totalCarbs: mealCarbs,
+        carbRange: `${Math.round(mealCarbs * 0.88)}–${Math.round(mealCarbs * 1.12)}g`,
+        confidence: 'High',
+        items: [
+          { name: activeInputs.mealDescription || 'Indian Preparation', quantity: 1, carbs: mealCarbs, unit: 'serving', icon: '🍛' }
+        ]
+      });
+      await new Promise(r => setTimeout(r, 550));
+      setPipelineStatus('PREDICTING_RISK');
+
+      // Step 3: FastAPI ML Inference (~600ms)
+      await runMLInference(activeInputs);
+      await new Promise(r => setTimeout(r, 650));
+      setPipelineStatus('GENERATING_DASHBOARD');
+
+      // Step 4: Health Dashboard Synthesis (~400ms)
+      await new Promise(r => setTimeout(r, 450));
+      setPipelineStatus('GENERATING_JOURNAL');
+
+      // Step 5: Logging to Journal (~350ms)
+      const newMealLog = {
+        id: `meal-${Date.now()}`,
+        type: 'meal',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        dayGroup: 'Today',
+        title: 'Logged Indian Meal',
+        description: activeInputs.mealDescription,
+        carbs: mealCarbs,
+        confidence: 'High',
+        items: [{ name: activeInputs.mealDescription, quantity: 1, carbs: mealCarbs, unit: 'serving', icon: '🍛' }]
+      };
+
+      const newGlucoseLog = {
+        id: `glu-${Date.now()}`,
+        type: 'glucose',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        dayGroup: 'Today',
+        title: `Pre-Meal Glucose: ${activeInputs.glucose} mg/dL`,
+        value: activeInputs.glucose,
+        unit: 'mg/dL',
+        trend: activeInputs.glucoseTrend || 'stable'
+      };
+
+      const newRiskLog = {
+        id: `rc-${Date.now()}`,
+        type: 'risk-check',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        dayGroup: 'Today',
+        title: `Hypo Risk Check`,
+        riskLevel: activeInputs.glucose < 70 ? 'CRITICAL' : 'LOW',
+        glucose: activeInputs.glucose,
+        insulinOnBoard: activeInputs.insulinOnBoard,
+        calculatedDose: 4.5,
+        summary: 'Analyzed through sequential decision-support pipeline.',
+        timeAgo: 'Just now'
+      };
+
+      setHistory([newRiskLog, newMealLog, newGlucoseLog]);
+      setGlucoseLogs([
+        { id: newGlucoseLog.id, value: activeInputs.glucose, recordedAt: new Date().toISOString(), mealRelation: 'pre_meal' },
+        { id: 'g-hist-1', value: 124, recordedAt: '2026-08-22T06:30:00Z', mealRelation: 'fasting' }
+      ]);
+
+      await new Promise(r => setTimeout(r, 400));
+      setPipelineStatus('COMPLETE');
+
+      // Unlock all pipeline stages
+      setUnlockedStages(['input', 'analysis', 'risk', 'dashboard', 'journal', 'report']);
+    } catch (err) {
+      setPipelineStatus('ERROR');
+      setPipelineError('Pipeline execution interrupted. Please retry.');
+    }
+  };
+
+  const resetAnalysis = () => {
+    setPipelineStep('input');
+    setPipelineStatus('IDLE');
+    setUnlockedStages(['input']);
+  };
 
   // =========================================================================
   // REACTIVE DERIVATION PIPELINE: Derives clinical risk, forecast & summaries
@@ -282,7 +346,7 @@ export function AppProvider({ children }) {
       timeSinceMealHours: hours
     });
 
-    // 2. Resolve ML values (prefer live FastAPI async result if available)
+    // 2. Resolve ML values
     const modelProb = asyncMLResult ? asyncMLResult.probability : Math.min(0.98, Math.max(0.04, evaluatedRisk.score / 100));
     const riskScore = asyncMLResult ? asyncMLResult.riskScore : evaluatedRisk.score;
     const riskClass = g < 70 ? 'CRITICAL' : (asyncMLResult ? asyncMLResult.riskLevel : evaluatedRisk.riskLevel);
@@ -303,9 +367,9 @@ export function AppProvider({ children }) {
     const todayMetrics = {
       timeInRangePct: timeInRange,
       averageGlucose: Math.round((g + 126) / 2),
-      mealsCount: 4,
+      mealsCount: history.filter(h => h.type === 'meal').length || 1,
       hypoAlertsCount: g < 70 || evaluatedRisk.isEmergencyHypo ? 2 : 1,
-      totalCarbsToday: carbs + 74,
+      totalCarbsToday: carbs,
       activeIobUnits: iob
     };
 
@@ -338,7 +402,7 @@ export function AppProvider({ children }) {
       referenceBolus: refBolus,
       todayMetrics
     };
-  }, [patientInputs, activeClinicalSettings, asyncMLResult, mlStatus]);
+  }, [patientInputs, activeClinicalSettings, asyncMLResult, mlStatus, history]);
 
   // Action: Update User Profile
   const updateUserProfile = (newProfile) => {
@@ -350,25 +414,7 @@ export function AppProvider({ children }) {
     }
   };
 
-  // Action: Switch Persona (Demo Mode)
-  const switchPersona = (personaKey) => {
-    if (DEMO_PERSONAS[personaKey]) {
-      const p = DEMO_PERSONAS[personaKey];
-      setCurrentPersonaKey(personaKey);
-      setPatientInputs(p.defaultInputs);
-      setActiveMeal({
-        description: p.defaultInputs.mealDescription,
-        totalCarbs: p.defaultInputs.carbsConsumed,
-        carbRange: `${p.defaultInputs.carbsConsumed - 8}–${p.defaultInputs.carbsConsumed + 8}g`,
-        confidence: 'High',
-        items: [
-          { name: p.defaultInputs.mealDescription, quantity: 1, carbs: p.defaultInputs.carbsConsumed, unit: 'serving', icon: '🍛' }
-        ]
-      });
-    }
-  };
-
-  // Action: Update a single patient input (e.g. from sliders or inputs)
+  // Action: Update a single patient input
   const updatePatientInput = (key, value) => {
     setPatientInputs(prev => ({
       ...prev,
@@ -376,136 +422,26 @@ export function AppProvider({ children }) {
     }));
   };
 
-  // Action: Apply preset scenario
-  const applyPresetScenario = (scenarioKey) => {
-    if (scenarioKey === 'SAFE_LOW') {
-      setPatientInputs(prev => ({
-        ...prev,
-        glucose: 110,
-        glucoseTrend: 'stable',
-        insulinOnBoard: 0.5,
-        carbsConsumed: 60,
-        carbsCovered: 60,
-        activityLevel: 'Light',
-        timeSinceMealHours: 1.5
-      }));
-    } else if (scenarioKey === 'MODERATE_CAUTION') {
-      setPatientInputs(prev => ({
-        ...prev,
-        glucose: 94,
-        glucoseTrend: 'falling',
-        insulinOnBoard: 2.2,
-        carbsConsumed: 30,
-        carbsCovered: 60,
-        activityLevel: 'Moderate',
-        timeSinceMealHours: 3.0
-      }));
-    } else if (scenarioKey === 'HIGH_RISK') {
-      setPatientInputs(prev => ({
-        ...prev,
-        glucose: 65,
-        glucoseTrend: 'falling_rapidly',
-        insulinOnBoard: 3.5,
-        carbsConsumed: 15,
-        carbsCovered: 65,
-        activityLevel: 'Intense',
-        timeSinceMealHours: 4.0
-      }));
-    }
-  };
-
-  // Action: Log Meal
-  const logMeal = async ({ description, carbs, confidence, items }) => {
-    const mealCarbs = Number(carbs) || 0;
-    const newMealRecord = {
-      id: `meal-${Date.now()}`,
-      type: 'meal',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      dayGroup: 'Today',
-      title: 'Logged Indian Meal',
-      description: description || 'Indian Meal',
-      carbs: mealCarbs,
-      confidence: confidence || 'High',
-      items: items || []
-    };
-
-    setActiveMeal({
-      description,
-      totalCarbs: mealCarbs,
-      carbRange: `${Math.round(mealCarbs * 0.85)}–${Math.round(mealCarbs * 1.15)}g`,
-      confidence,
-      items
-    });
-
-    setHistory(prev => [newMealRecord, ...prev]);
-    setPatientInputs(prev => ({
-      ...prev,
-      carbsConsumed: mealCarbs,
-      carbsCovered: mealCarbs,
-      mealDescription: description,
-      timeSinceMealHours: 0.2
-    }));
-
-    await DataService.saveMeal(newMealRecord);
-  };
-
-  // Action: Log Glucose Reading
-  const logGlucoseReading = async ({ value, mealRelation, trend, notes }) => {
-    const num = Number(value);
-    const newLog = {
-      id: `glu-${Date.now()}`,
-      type: 'glucose',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      dayGroup: 'Today',
-      title: `${mealRelation === 'fasting' ? 'Fasting' : 'Post-Meal'} Glucose: ${num} mg/dL`,
-      value: num,
-      unit: 'mg/dL',
-      trend: trend || 'stable',
-      notes
-    };
-
-    setHistory(prev => [newLog, ...prev]);
-    setGlucoseLogs(prev => [{ id: newLog.id, value: num, recordedAt: new Date().toISOString(), mealRelation }, ...prev]);
-    setPatientInputs(prev => ({
-      ...prev,
-      glucose: num,
-      glucoseTrend: trend || prev.glucoseTrend
-    }));
-
-    await DataService.saveGlucose(newLog);
-  };
-
-  // Action: Log Risk Check to History
-  const logRiskCheckToHistory = async () => {
-    const newRecord = {
-      id: `rc-${Date.now()}`,
-      type: 'risk-check',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      dayGroup: 'Today',
-      title: `${derivedPatientState.riskClass} Risk Check (${derivedPatientState.riskScore}/100)`,
-      riskLevel: derivedPatientState.riskClass,
-      glucose: derivedPatientState.glucose,
-      insulinOnBoard: derivedPatientState.insulinOnBoard,
-      calculatedDose: derivedPatientState.referenceBolus.totalSuggestedDose,
-      summary: derivedPatientState.headline,
-      timeAgo: 'Just now'
-    };
-
-    setHistory(prev => [newRecord, ...prev]);
-    await DataService.saveRiskAssessment(newRecord);
-  };
-
   const navigateTo = (viewName) => {
-    setCurrentView(viewName);
+    setPipelineStep(viewName);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <AppContext.Provider
       value={{
-        // Navigation & Modals
-        currentView,
+        // Pipeline State Machine
+        pipelineStep,
+        setPipelineStep,
+        pipelineStatus,
+        pipelineError,
+        unlockedStages,
+        startAnalysis,
+        resetAnalysis,
+        currentView: pipelineStep,
         navigateTo,
+
+        // Modals
         isSettingsOpen,
         setIsSettingsOpen,
         isGlucoseModalOpen,
@@ -536,15 +472,13 @@ export function AppProvider({ children }) {
         currentPersonaKey,
         currentPersona,
         DEMO_PERSONAS: Object.values(DEMO_PERSONAS),
-        switchPersona,
 
         // Single Centralized Reactive Patient State
         patientState: derivedPatientState,
         patientInputs,
         updatePatientInput,
-        applyPresetScenario,
 
-        // Specific Aliases for backward compatibility
+        // Specific Aliases for components
         riskInputs: {
           glucose: derivedPatientState.glucose,
           insulinOnBoard: derivedPatientState.insulinOnBoard,
@@ -575,12 +509,7 @@ export function AppProvider({ children }) {
         history,
         setHistory,
         glucoseLogs,
-        setGlucoseLogs,
-
-        // Actions
-        logMeal,
-        logGlucoseReading,
-        logRiskCheckToHistory
+        setGlucoseLogs
       }}
     >
       {children}

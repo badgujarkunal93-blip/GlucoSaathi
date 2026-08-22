@@ -1,20 +1,23 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  Sparkles, 
+  Activity, 
   Utensils, 
   ShieldCheck, 
   LayoutDashboard, 
-  BookOpen
+  BookOpen,
+  Lock
 } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
+  const { unlockedStages } = useApp();
+
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: Sparkles },
-    { id: 'meal', label: 'Meal', icon: Utensils },
-    { id: 'risk', label: 'Risk', icon: ShieldCheck },
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'journal', label: 'Journal', icon: BookOpen },
+    { id: 'input', label: '01 Input', icon: Activity },
+    { id: 'analysis', label: '02 AI', icon: Utensils },
+    { id: 'risk', label: '03 Risk', icon: ShieldCheck },
+    { id: 'dashboard', label: '04 Health', icon: LayoutDashboard },
+    { id: 'journal', label: '05 Journal', icon: BookOpen },
   ];
 
   return (
@@ -22,17 +25,29 @@ export default function BottomNav({ activeTab, setActiveTab }) {
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isUnlocked = unlockedStages.includes(item.id);
           const isActive = activeTab === item.id;
+
           return (
             <button
               key={item.id}
+              disabled={!isUnlocked}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-all ${
-                isActive ? 'text-[#075B57] font-extrabold' : 'text-[#66716F]'
+              className={`flex flex-col items-center py-1 px-2 rounded-xl transition-all ${
+                isActive 
+                  ? 'text-[#075B57] font-extrabold' 
+                  : isUnlocked
+                    ? 'text-[#66716F]'
+                    : 'text-[#66716F]/40 cursor-not-allowed opacity-50'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'text-[#075B57]' : 'text-[#8A9694]'}`} />
-              <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
+              <div className="relative">
+                <Icon className={`w-5 h-5 ${isActive ? 'text-[#075B57]' : isUnlocked ? 'text-[#8A9694]' : 'text-[#66716F]/30'}`} />
+                {!isUnlocked && (
+                  <Lock className="w-2.5 h-2.5 text-[#66716F]/50 absolute -top-1 -right-1" />
+                )}
+              </div>
+              <span className="text-[9px] tracking-tight mt-0.5">{item.label}</span>
             </button>
           );
         })}
