@@ -22,39 +22,48 @@ Living with **Type 1 Diabetes (T1D)** in India requires navigating over **180 gl
 
 ---
 
-## 🧭 Application Architecture: Two Distinct Modes
+## 🧭 Application Architecture: Three Distinct Modes
 
-GlucoSaathi decouples the public-facing product introduction from the dense clinical assessment workflow:
+GlucoSaathi decouples the public product introduction from the linear clinical workflow and historical records:
 
 ```text
-┌────────────────────────────────────────────────────────────┐
-│ 1. MARKETING / HERO FRONT DOOR (appMode: 'landing')        │
-│    Cinematic, Spacious, Conceptual Intelligence Visual     │
-└─────────────────────────────┬──────────────────────────────┘
-                              │ [ START ASSESSMENT ➔ ]
-                              ▼
-┌────────────────────────────────────────────────────────────┐
-│ 2. CLINICAL DECISION PIPELINE (appMode: 'assessment')       │
-│    01 INPUT ➔ 02 AI ANALYSIS ➔ 03 RISK ➔ 04 HEALTH ➔       │
-│    05 JOURNAL ➔ 06 DOCTOR REPORT ➔ SAVE & ARCHIVE          │
-└────────────────────────────────────────────────────────────┘
-                              │ [ Save & View Reports ➔ ]
-                              ▼
-┌────────────────────────────────────────────────────────────┐
-│ 3. SAVED REPORTS ARCHIVE (appMode: 'saved-reports')        │
-│    Inspect Historical Snapshots • Reassess • New Session   │
-└────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. MARKETING / HERO FRONT DOOR (appMode: 'landing')                         │
+│    Spacious, Editorial Layout • Conceptual Intelligence Visual • Canvas Grid │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ [ START ASSESSMENT ➔ ]
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. CLINICAL DECISION PIPELINE (appMode: 'assessment')                        │
+│    Stage 01: Patient Input (Glucose, Trend, IOB, Meal, Activity)            │
+│       ↓                                                                     │
+│    Stage 02: AI Meal Analysis (Gemini 1.5 + ICMR-NIN IFCT 2017)             │
+│       ↓                                                                     │
+│    Stage 03: Risk & Trajectory (forecastEngine.js + Calibrated LightGBM)    │
+│       ↓                                                                     │
+│    Stage 04: Health Dashboard (Bento Glycemic Metrics & TIR 82%)            │
+│       ↓                                                                     │
+│    Stage 05: Health Journal (Longitudinal History & CSV Importer)           │
+│       ↓                                                                     │
+│    Stage 06: Doctor Report (Endocrinologist Summary Modal)                  │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ [ Save & View Reports ➔ ]
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. SAVED REPORTS ARCHIVE (appMode: 'saved-reports')                         │
+│    Inspect Historical Snapshots • Delete Records • Reassess Previous Data   │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 Key Capabilities
+## 🎯 Key Capabilities & Innovation
 
 * **Multimodal Indian Meal Understanding**: Natural language (Hindi/English text) and photo plate decomposition into structured ingredients and household portion units via Google Gemini 1.5 Flash.
 * **Authoritative Indian Nutrition (ICMR-NIN IFCT 2017)**: Strict deterministic macronutrient mapping with uncertainty ranges ($60\text{--}76\text{g}$) and glycemic index (GI) ratings.
 * **Dynamic Multi-Factor Glucose Trajectory Engine**: Computes continuous time-series curves ($-60\text{m} \to \text{NOW} \to +30\text{m}$) using glucose momentum, active insulin (IOB) downward pressure, carb absorption kinetics, and physical activity modifiers.
 * **Real CGM & Simulated Baseline Support**: Renders actual sensor telemetry when CSV files are imported, or smooth mathematical baselines labeled *"Simulated trajectory — no CGM history uploaded"*.
-* **Calibrated Hypoglycemia Prediction ($P(\text{hypo} < 70)$)**: Gradient boosted tree classification with Platt scaling calibration trained on OhioT1DM and HUPA-UCM patient datasets.
+* **Calibrated Hypoglycemia Prediction ($P(\text{hypo} < 70\text{ mg/dL})$)**: Gradient boosted tree classification with Platt scaling calibration trained on OhioT1DM and HUPA-UCM patient datasets.
 * **Prediction Uncertainty Interval**: Relabeled prototype prediction interval ($\pm 12\text{--}22\text{ mg/dL}$) with explicit clinical disclaimer notes.
 * **Explainable Physiological Reasoning**: Normalized factor attribution drivers (*Glucose Momentum*, *Active IOB*, *Exercise Uptake*, *Carb Absorption*).
 * **Clinical Rule of 15 Protocol**: Hardcoded emergency guardrail armed automatically whenever blood glucose $< 70\text{ mg/dL}$.
@@ -63,29 +72,53 @@ GlucoSaathi decouples the public-facing product introduction from the dense clin
 
 ---
 
-## 🏗️ End-to-End System Flow
+## 🏗️ End-to-End System Architecture
 
 ```mermaid
-flowchart TD
-    subgraph STAGE_00 [Product Front Door]
-        LP[Landing Page / Hero] -->|Click 'Start Assessment'| STAGE_01
+flowchart TB
+    subgraph UI_LAYER [Frontend Application - React 19 + Vite]
+        LANDING[Landing Page & Canvas Grid]
+        STEPPER[Pipeline Stepper Navbar]
+        INPUT_S[01 Patient Input Stage]
+        MEAL_S[02 AI Meal Analysis Stage]
+        RISK_S[03 Risk Check & Trajectory Stage]
+        DASH_S[04 Health Dashboard Stage]
+        JOURNAL_S[05 Health Journal Stage]
+        REPORT_M[06 Doctor Report Modal]
+        SAVED_PAGE[Saved Reports Archive]
+        STATE[Central PatientState Engine]
     end
 
-    subgraph CLINICAL_PIPELINE [Sequential Decision-Support Pipeline]
-        STAGE_01[01 Patient Input<br/>Glucose, Trend, IOB, Meal, Activity] -->|Start Analysis| PROC[Live Pipeline Visualizer]
-        PROC --> STAGE_02[02 AI Meal Parsing<br/>ICMR-NIN IFCT 2017 Resolution]
-        STAGE_02 --> STAGE_03[03 Risk Check & Trajectory<br/>Calibrated LightGBM + Conformal Band]
-        STAGE_03 --> STAGE_04[04 Health Dashboard<br/>TIR %, Bento Glycemic Metrics]
-        STAGE_04 --> STAGE_05[05 Health Journal<br/>Longitudinal Timeline Log]
-        STAGE_05 --> STAGE_06[06 Doctor Report Modal<br/>Endocrinologist Clinical Summary]
+    subgraph BACKEND_SERVICES [Application & Storage Layer]
+        EXPRESS[Express.js API Gateway :3001]
+        STORAGE[reportStorage.js Abstraction Layer]
+        FORECAST[forecastEngine.js Dynamic Trajectory]
+        ZOD[Zod Schema Validator]
     end
 
-    subgraph ARCHIVE_LAYER [Clinical Archive & Storage]
-        STAGE_06 -->|Save & View Reports| SAVED[Saved Reports Archive<br/>/saved-reports]
-        SAVED -->|View Snapshot| DETAIL[Read-Only Report Viewer]
-        SAVED -->|Reassess| STAGE_01
-        SAVED -->|Start New| LP
+    subgraph ML_MICROSERVICE [Python FastAPI Microservice :8000]
+        FASTAPI[FastAPI Gateway]
+        FEAT[24-Signal Feature Engineering]
+        LGBM[Calibrated LightGBM Classifier]
+        CONF[Conformal Forecaster]
     end
+
+    subgraph KNOWLEDGE_BASE [Nutritional Ground-Truth]
+        IFCT[(ICMR-NIN IFCT 2017 DB)]
+        GEMINI[Google Gemini 1.5 Flash]
+    end
+
+    LANDING -->|Start Assessment| INPUT_S
+    INPUT_S --> MEAL_S --> RISK_S --> DASH_S --> JOURNAL_S --> REPORT_M
+    REPORT_M -->|Save & View Reports| SAVED_PAGE
+    SAVED_PAGE -->|Reassess| INPUT_S
+
+    INPUT_S & MEAL_S & RISK_S & DASH_S & JOURNAL_S & REPORT_M <--> STATE
+    STATE <--> STORAGE
+    RISK_S <--> FORECAST
+    MEAL_S <--> GEMINI & IFCT
+    RISK_S <--> FASTAPI
+    FASTAPI --> FEAT --> LGBM & CONF
 ```
 
 ---
@@ -145,7 +178,7 @@ npm run dev
 
 ---
 
-## 🧪 Testing
+## 🧪 Comprehensive Automated Testing
 
 ```bash
 # Run Vitest Frontend & Storage Test Suite (28 Tests)
@@ -154,7 +187,7 @@ npm test
 # Run Pytest Python ML Microservice Test Suite (7 Tests)
 npm run test:ml
 
-# Validate Production Build
+# Validate Production Bundle (Vite)
 cd frontend && npm run build
 ```
 
@@ -166,7 +199,8 @@ The repository includes pre-configured `vercel.json` and `frontend/vercel.json` 
 
 1. Import `badgujarkunal93-blip/GlucoSaathi` on **[vercel.com](https://vercel.com)**.
 2. Set **Root Directory** to `frontend`.
-3. Click **Deploy**.
+3. Set **Framework Preset** to `Vite`.
+4. Click **Deploy**.
 
 ---
 
