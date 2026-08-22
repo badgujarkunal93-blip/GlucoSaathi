@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import LandingNavbar from './components/landing/LandingNavbar';
+import LandingPage from './components/landing/LandingPage';
+import LandingFooter from './components/landing/LandingFooter';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import StagePatientInput from './components/pipeline/StagePatientInput';
 import PipelineProcessingView from './components/pipeline/PipelineProcessingView';
-import Overview from './components/Overview';
 import Dashboard from './components/Dashboard';
 import LogMeal from './components/LogMeal';
 import RiskCheck from './components/RiskCheck';
@@ -18,11 +20,14 @@ import LogInsulinModal from './components/LogInsulinModal';
 import LogActivityModal from './components/LogActivityModal';
 import DoctorReportModal from './components/DoctorReportModal';
 import InteractiveCrossGrid from './components/background/InteractiveCrossGrid';
-import { ArrowRight, RotateCcw } from 'lucide-react';
+import { ArrowRight, ChevronLeft, RotateCcw } from 'lucide-react';
 import Lenis from 'lenis';
 
 function MainContent() {
   const { 
+    appMode,
+    startAssessment,
+    backToLanding,
     pipelineStep,
     setPipelineStep,
     pipelineStatus,
@@ -70,7 +75,7 @@ function MainContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const renderActiveView = () => {
+  const renderAssessmentView = () => {
     if (pipelineStep === 'processing') {
       return (
         <PipelineProcessingView 
@@ -164,7 +169,7 @@ function MainContent() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-[#F7F8F5] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
-      {/* 0. Subtle Medical Telemetry Interactive Cross Grid (Sits at z-0 behind content) */}
+      {/* 0. Subtle Medical Telemetry Interactive Cross Grid (z-0) */}
       <InteractiveCrossGrid 
         crossSize={5.5}
         strokeWidth={1.1}
@@ -180,27 +185,57 @@ function MainContent() {
         enableCursorGlow={true}
       />
 
-      {/* 1. Sequential Pipeline Stepper Top Header (z-50) */}
-      <Navbar 
-        onOpenDoctorReport={() => setIsDoctorReportModalOpen(true)}
-        onOpenSettings={() => setIsUserProfileOpen(true)}
-      />
+      {/* ========================================================================= */}
+      {/* 1. MARKETING / HERO LANDING PAGE EXPERIENCE */}
+      {/* ========================================================================= */}
+      {appMode === 'landing' ? (
+        <>
+          <LandingNavbar onStartAssessment={startAssessment} />
+          <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
+            <LandingPage onStartAssessment={startAssessment} />
+          </main>
+          <LandingFooter onStartAssessment={startAssessment} />
+        </>
+      ) : (
+        /* ========================================================================= */
+        /* 2. CLINICAL ASSESSMENT PIPELINE EXPERIENCE */
+        /* ========================================================================= */
+        <>
+          <Navbar 
+            onOpenDoctorReport={() => setIsDoctorReportModalOpen(true)}
+            onOpenSettings={() => setIsUserProfileOpen(true)}
+            onBackToLanding={backToLanding}
+          />
+          
+          <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12 space-y-4">
+            {/* Return to Product Overview link */}
+            <div className="flex items-center justify-between pb-2 border-b border-black/5">
+              <button
+                onClick={backToLanding}
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#66716F] hover:text-[#075B57] transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Back to Product Overview</span>
+              </button>
 
-      {/* 2. Main Application Content Container (z-10, max width 1440px / 7xl) */}
-      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-        {renderActiveView()}
-      </main>
+              <div className="text-[11px] text-[#075B57] font-bold">
+                Clinical Decision Support Session Active
+              </div>
+            </div>
 
-      {/* 3. Responsive Mobile Bottom Navigation */}
-      <BottomNav 
-        activeTab={pipelineStep} 
-        setActiveTab={handleNavigate} 
-      />
+            {renderAssessmentView()}
+          </main>
 
-      {/* 4. Editorial Application Footer */}
-      <Footer onNavigate={handleNavigate} />
+          <BottomNav 
+            activeTab={pipelineStep} 
+            setActiveTab={handleNavigate} 
+          />
 
-      {/* 5. Clinical Modals & Drawers */}
+          <Footer onNavigate={handleNavigate} />
+        </>
+      )}
+
+      {/* 3. Clinical Modals & Drawers */}
       <UserProfileModal 
         isOpen={isUserProfileOpen} 
         onClose={() => setIsUserProfileOpen(false)} 

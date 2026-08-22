@@ -96,6 +96,16 @@ const DEFAULT_USER_PROFILE = {
 
 export function AppProvider({ children }) {
   // =========================================================================
+  // APPLICATION MODE: 'landing' (Default) vs 'assessment' (Clinical Pipeline)
+  // =========================================================================
+  const [appMode, setAppMode] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#assessment') {
+      return 'assessment';
+    }
+    return 'landing';
+  });
+
+  // =========================================================================
   // PIPELINE STATE MACHINE & PROGRESSION
   // =========================================================================
   // pipelineStep: 'input' | 'processing' | 'analysis' | 'risk' | 'dashboard' | 'journal' | 'report'
@@ -427,9 +437,30 @@ export function AppProvider({ children }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const startAssessment = () => {
+    setAppMode('assessment');
+    setPipelineStep('input');
+    setPipelineStatus('IDLE');
+    setUnlockedStages(['input']);
+    if (typeof window !== 'undefined') window.location.hash = '#assessment';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const backToLanding = () => {
+    setAppMode('landing');
+    if (typeof window !== 'undefined') window.location.hash = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <AppContext.Provider
       value={{
+        // App Mode (Landing vs Assessment Pipeline)
+        appMode,
+        setAppMode,
+        startAssessment,
+        backToLanding,
+
         // Pipeline State Machine
         pipelineStep,
         setPipelineStep,

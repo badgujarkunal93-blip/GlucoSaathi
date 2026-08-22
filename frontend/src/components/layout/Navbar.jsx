@@ -19,7 +19,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 
-export default function Navbar({ onOpenDoctorReport, onOpenSettings }) {
+export default function Navbar({ onOpenDoctorReport, onOpenSettings, onBackToLanding }) {
   const { 
     patientState,
     mlStatus,
@@ -31,7 +31,8 @@ export default function Navbar({ onOpenDoctorReport, onOpenSettings }) {
     setPipelineStep,
     unlockedStages,
     resetAnalysis,
-    pipelineStatus
+    pipelineStatus,
+    backToLanding
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,6 +48,12 @@ export default function Navbar({ onOpenDoctorReport, onOpenSettings }) {
 
   const isEmergency = patientState.glucose < 70 || patientState.isEmergencyHypo;
   const isCompleted = unlockedStages.length > 1 && pipelineStatus === 'COMPLETE';
+
+  const handleLogoClick = () => {
+    if (onBackToLanding) onBackToLanding();
+    else if (backToLanding) backToLanding();
+    else setPipelineStep('input');
+  };
 
   const handleStageClick = (stageId) => {
     if (!unlockedStages.includes(stageId)) return;
@@ -64,8 +71,9 @@ export default function Navbar({ onOpenDoctorReport, onOpenSettings }) {
           
           {/* 1. Left: Brand Identity */}
           <div 
-            onClick={() => setPipelineStep('input')}
+            onClick={handleLogoClick}
             className="flex items-center space-x-3 cursor-pointer group shrink-0"
+            title="Return to Product Home"
           >
             <div className="w-9 h-9 rounded-xl bg-[#075B57] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
               <Activity className="w-5 h-5 text-[#DFF4E8]" />

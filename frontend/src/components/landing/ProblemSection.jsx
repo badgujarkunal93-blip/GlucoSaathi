@@ -1,89 +1,82 @@
 import React from 'react';
-import { UtensilsCrossed, HelpCircle, ShieldAlert } from 'lucide-react';
+import { AlertCircle, Scale, Clock, TrendingDown } from 'lucide-react';
 
 export default function ProblemSection() {
   const problems = [
     {
-      step: '01',
-      question: 'What am I eating?',
-      tag: 'COMPOSITE INDIAN THALIS',
-      description: 'Indian meals are rarely single ingredients. A standard plate is a composite blend of rotis, dal tadka, rice, sabzi, curd, and sweets, making traditional calorie counters inaccurate.',
-      icon: UtensilsCrossed,
-      color: '#DFF4E8',
-      accent: '#24A66A'
+      number: '01',
+      tag: 'IDENTIFICATION',
+      question: 'What did I actually eat?',
+      description: 'Indian meals are rarely single ingredients. Thalis, biryanis, and curries combine multiple grains, legumes, fats, and regional spices that Western nutrition apps fail to dissect.'
     },
     {
-      step: '02',
-      question: 'How many carbs are actually there?',
-      tag: 'NO REGIONAL CARB DATA',
-      description: 'Western databases fail at Indian cooking. Variations in flour, ghee, and traditional portion units (katoris vs grams) cause unpredictable post-prandial glycemic spikes.',
-      icon: HelpCircle,
-      color: '#FEF7E6',
-      accent: '#E7B84B'
+      number: '02',
+      tag: 'QUANTIFICATION',
+      question: 'How many carbs are really there?',
+      description: 'Volumetric household measures (katoris, ladles, variable roti thickness) and hidden cooking fats introduce substantial ±15–20g carbohydrate estimation variance.'
     },
     {
-      step: '03',
-      question: 'Could this put me at risk later?',
-      tag: 'THE 180-DECISION BURDEN',
-      description: 'An insulin overestimate triggers sudden hypoglycemia (<70 mg/dL). Existing tools only react after blood glucose crashes instead of providing predictive warnings.',
-      icon: ShieldAlert,
-      color: '#FDE8E9',
-      accent: '#D95C62'
+      number: '03',
+      tag: 'PHYSIOLOGICAL RISK',
+      question: 'What happens in the next 45 minutes?',
+      description: 'Carbohydrates alone do not determine risk. Active insulin stacking and postprandial physical activity can rapidly precipitate acute, life-threatening hypoglycemia.'
     }
   ];
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#043F3D] text-white">
-      <div className="max-w-6xl mx-auto space-y-16">
-        {/* Editorial Section Heading */}
-        <div className="max-w-3xl space-y-4">
-          <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#24A66A] font-display">
-            STAGE 01 • THE PROBLEM
-          </span>
-          <h2 className="text-4xl sm:text-6xl md:text-7xl font-black font-editorial tracking-tight text-white leading-[1.05]">
-            Every meal is a decision.
+    <section id="problem" className="py-16 sm:py-24 bg-[#063F3D] text-white rounded-3xl my-12 shadow-2xl relative overflow-hidden">
+      
+      {/* Background Subtle Geometry */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#1E9E67]/10 rounded-full blur-3xl pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
+        
+        {/* Section Header */}
+        <div className="max-w-3xl space-y-3">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 text-[#FFE280] text-xs font-black uppercase tracking-widest border border-white/15">
+            <span>THE T1D CHALLENGE IN INDIA</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-white leading-tight">
+            Every meal is a chain of decisions.
           </h2>
-          <p className="text-base sm:text-lg text-[#DFF4E8]/80 font-normal leading-relaxed max-w-2xl">
-            For 37 million Indians living with diabetes, carbohydrate estimation isn't a fitness tracking exercise—it's a critical daily calculation to prevent life-threatening hypoglycemic crashes.
+          <p className="text-sm sm:text-base text-[#DFF4E8]/85 leading-relaxed font-normal">
+            For people living with Type 1 Diabetes in India, managing blood glucose is a continuous calculation involving cultural composite diets, non-standardized portions, active insulin dynamics, and unpredictable daily schedules.
           </p>
         </div>
 
-        {/* 3 Large Staged Question Cards */}
+        {/* 3 Large Problem Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {problems.map((p, idx) => {
-            const Icon = p.icon;
-            return (
-              <div
-                key={idx}
-                className="p-8 rounded-[24px] bg-white/5 border border-white/10 flex flex-col justify-between space-y-8 hover:bg-white/8 hover:border-[#24A66A]/40 transition-all group"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black tracking-widest text-[#DFF4E8]/60">
-                      STEP {p.step}
-                    </span>
-                    <div className="p-2.5 rounded-full bg-white/10 text-white group-hover:scale-110 transition-transform">
-                      <Icon className="w-4 h-4" style={{ color: p.accent }} />
-                    </div>
-                  </div>
-
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/10 text-[#DFF4E8] block w-fit">
-                    {p.tag}
+          {problems.map((prob) => (
+            <div 
+              key={prob.number}
+              className="p-8 rounded-2xl bg-white/5 border border-white/10 space-y-4 hover:border-white/20 transition-colors flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-[#FFE280] font-display">
+                    {prob.number}
                   </span>
-
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white font-editorial leading-snug">
-                    "{p.question}"
-                  </h3>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#DFF4E8]/70 bg-white/10 px-2.5 py-0.5 rounded-full">
+                    {prob.tag}
+                  </span>
                 </div>
-
-                <p className="text-xs sm:text-sm text-[#DFF4E8]/75 leading-relaxed">
-                  {p.description}
+                <h3 className="text-xl font-extrabold text-white font-display">
+                  "{prob.question}"
+                </h3>
+                <p className="text-xs sm:text-sm text-[#DFF4E8]/80 leading-relaxed font-normal">
+                  {prob.description}
                 </p>
               </div>
-            );
-          })}
+
+              <div className="pt-4 border-t border-white/10 text-[11px] font-bold text-[#FFE280]/80">
+                Critical clinical decision point
+              </div>
+            </div>
+          ))}
         </div>
+
       </div>
+
     </section>
   );
 }
