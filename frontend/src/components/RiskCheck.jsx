@@ -144,14 +144,16 @@ export default function RiskCheck({ onNavigate }) {
       {/* 3. Hero Continuous CGM Trajectory Chart */}
       <CGMTrajectory 
         currentGlucose={patientState.glucose}
-        trend={patientState.glucoseTrend}
+        trend={patientState.trend || patientState.glucoseTrend || patientInputs.glucoseTrend}
         iob={patientState.insulinOnBoard}
         recentCarbs={patientState.carbsConsumed}
+        mealName={patientState.meal || patientInputs.mealText}
         activityLevel={patientState.activityLevel}
-        targetMin={settings.targetMin}
-        targetMax={settings.targetMax}
+        targetMin={settings.targetMin || 70}
+        targetMax={settings.targetMax || 140}
         forecastGlucose={patientState.forecast30mGlucose}
         hypoProbability={patientState.modelProbability}
+        cgmHistory={patientState.cgmHistory}
       />
 
       {/* 4. Main Two-Column Layout */}
