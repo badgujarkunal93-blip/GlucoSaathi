@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import { evaluateHypoglycemiaRisk, calculateBolusReference } from '../lib/risk/riskEngine';
 import { estimateCarbohydrates } from '../lib/carb/carbEstimator';
 import { DataService } from '../services/dataService';
+import { mlClient } from '../services/mlService';
 
 const AppContext = createContext();
 
@@ -80,6 +81,19 @@ export const DEMO_PERSONAS = {
   }
 };
 
+const DEFAULT_USER_PROFILE = {
+  name: 'Me (My Profile)',
+  age: 26,
+  condition: 'Type 1 Diabetes',
+  icrRatio: 15,
+  correctionFactor: 50,
+  targetMin: 70,
+  targetMax: 140,
+  activeInsulinType: 'Rapid Acting (Aspart / Novorapid)',
+  basalRegimen: '16 U Basal at 10 PM',
+  preferredUnits: 'mg/dL'
+};
+
 const INITIAL_HISTORY = [
   {
     id: 'rc-1',
@@ -118,21 +132,6 @@ const INITIAL_HISTORY = [
     value: 108,
     unit: 'mg/dL',
     trend: 'stable'
-  },
-  {
-    id: 'meal-2',
-    type: 'meal',
-    timestamp: '7:58 PM',
-    dayGroup: 'Yesterday',
-    title: 'Dinner',
-    description: '2 rotis, mixed sabzi and curd',
-    carbs: 48,
-    confidence: 'High',
-    items: [
-      { name: 'Whole Wheat Roti', quantity: 2, carbs: 30, unit: 'piece', icon: '🫓' },
-      { name: 'Mixed Vegetable Sabzi', quantity: 1, carbs: 12, unit: 'bowl', icon: '🥬' },
-      { name: 'Plain Curd / Dahi', quantity: 1, carbs: 6, unit: 'bowl', icon: '🥣' }
-    ]
   }
 ];
 
@@ -146,16 +145,52 @@ export function AppProvider({ children }) {
   const [isInsulinModalOpen, setIsInsulinModalOpen] = useState(false);
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isDoctorReportModalOpen, setIsDoctorReportModalOpen] = useState(false);
+  const [isCSVImportOpen, setIsCSVImportOpen] = useState(false);
+  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
 
-  // Active Persona & Clinical Settings
+  // Data Mode: 'my_data' (Default) vs 'demo_scenario'
+  const [dataMode, setDataMode] = useState('my_data');
+
+  // Real Persistent User Profile
+  const [userProfile, setUserProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem('glucosaathi_user_profile');
+      return saved ? JSON.parse(saved) : DEFAULT_USER_PROFILE;
+    } catch {
+      return DEFAULT_USER_PROFILE;
+    }
+  });
+
+  // Active Demo Persona (when in 'demo_scenario' mode)
   const [currentPersonaKey, setCurrentPersonaKey] = useState('aarav');
   const currentPersona = DEMO_PERSONAS[currentPersonaKey] || DEMO_PERSONAS.aarav;
-  const [settings, setSettings] = useState(currentPersona);
+
+  // Active clinical settings resolved based on dataMode
+  const activeClinicalSettings = useMemo(() => {
+    if (dataMode === 'demo_scenario') {
+      return currentPersona;
+    }
+    return userProfile;
+  }, [dataMode, currentPersona, userProfile]);
 
   // =========================================================================
   // SINGLE SOURCE OF TRUTH: Centralized Patient Input Telemetry
   // =========================================================================
-  const [patientInputs, setPatientInputs] = useState(currentPersona.defaultInputs);
+  const [patientInputs, setPatientInputs] = useState({
+    glucose: 108,
+    glucoseTrend: 'falling_slowly',
+    insulinOnBoard: 0.8,
+    recentBolus: 4.5,
+    carbsConsumed: 68,
+    carbsCovered: 68,
+    timeSinceMealHours: 2.0,
+    activityLevel: 'Light',
+    mealDescription: '2 rotis, dal tadka and steamed rice'
+  });
+
+  // ML Service Live Health & Async Prediction State
+  const [mlStatus, setMlStatus] = useState('unknown'); // 'online' | 'offline' | 'loading'
+  const [asyncMLResult, setAsyncMLResult] = useState(null);
 
   // History & Journal logs
   const [history, setHistory] = useState(INITIAL_HISTORY);
@@ -179,8 +214,54 @@ export function AppProvider({ children }) {
     ]
   });
 
+  // Check ML Service Health on mount
+  useEffect(() => {
+    let isMounted = true;
+    mlClient.checkHealth().then((res) => {
+      if (isMounted) {
+        setMlStatus(res.online ? 'online' : 'offline');
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  // Async query to FastAPI ML Microservice whenever patient inputs change
+  useEffect(() => {
+    let isMounted = true;
+    const g = Number(patientInputs.glucose) || 108;
+    const iob = Number(patientInputs.insulinOnBoard) || 0;
+    const carbs = Number(patientInputs.carbsConsumed) || 68;
+    const activity = patientInputs.activityLevel || 'Light';
+    const trend = patientInputs.glucoseTrend || 'falling_slowly';
+    const roc = trend === 'falling_rapidly' ? -2.2 : trend.includes('falling') ? -1.2 : trend.includes('rising') ? 1.5 : 0.0;
+
+    Promise.all([
+      mlClient.predictHypoRisk({ glucose: g, glucoseRoc: roc, iob, carbs, activityLevel: activity }),
+      mlClient.predictGlucoseForecast({ glucose: g, glucoseRoc: roc, iob, carbs, steps: activity === 'Intense' ? 2500 : 800 })
+    ]).then(([riskRes, forecastRes]) => {
+      if (isMounted) {
+        setMlStatus(riskRes.success ? 'online' : 'offline');
+        setAsyncMLResult({
+          probability: riskRes.probability,
+          riskScore: riskRes.riskScore,
+          riskLevel: riskRes.riskLevel,
+          isRuleOf15Armed: riskRes.isRuleOf15Armed,
+          explainability: riskRes.explainability,
+          predictedGlucose: forecastRes.predictedGlucose,
+          conformalLower: forecastRes.intervalLower,
+          conformalUpper: forecastRes.intervalUpper,
+          mlSource: riskRes.source
+        });
+      }
+    }).catch(() => {
+      if (isMounted) setMlStatus('offline');
+    });
+
+    return () => { isMounted = false; };
+  }, [patientInputs]);
+
   // =========================================================================
-  // REACTIVE DERIVATION PIPELINE: Derives ML risk, forecast & clinical state
+  // REACTIVE DERIVATION PIPELINE: Derives clinical risk, forecast & summaries
   // =========================================================================
   const derivedPatientState = useMemo(() => {
     const g = Number(patientInputs.glucose) || 108;
@@ -191,7 +272,7 @@ export function AppProvider({ children }) {
     const hours = Number(patientInputs.timeSinceMealHours) || 2.0;
     const trend = patientInputs.glucoseTrend || 'falling_slowly';
 
-    // 1. Evaluate Risk Engine
+    // 1. Fallback / Local Physiological Calculation
     const evaluatedRisk = evaluateHypoglycemiaRisk({
       glucose: g,
       insulinOnBoard: iob,
@@ -201,33 +282,23 @@ export function AppProvider({ children }) {
       timeSinceMealHours: hours
     });
 
-    // 2. Derive Hypoglycemia Probability (0.00 to 1.00)
-    let modelProb = Math.min(0.98, Math.max(0.04, evaluatedRisk.score / 100));
-    if (g < 70) modelProb = Math.max(0.85, modelProb);
+    // 2. Resolve ML values (prefer live FastAPI async result if available)
+    const modelProb = asyncMLResult ? asyncMLResult.probability : Math.min(0.98, Math.max(0.04, evaluatedRisk.score / 100));
+    const riskScore = asyncMLResult ? asyncMLResult.riskScore : evaluatedRisk.score;
+    const riskClass = g < 70 ? 'CRITICAL' : (asyncMLResult ? asyncMLResult.riskLevel : evaluatedRisk.riskLevel);
+    const predicted30m = asyncMLResult ? asyncMLResult.predictedGlucose : (g < 70 ? 54 : Math.round(g - (iob * 8.5) + (carbs * 0.2)));
 
-    let riskClass = 'LOW';
-    if (modelProb >= 0.75 || g < 70) riskClass = 'CRITICAL';
-    else if (modelProb >= 0.50) riskClass = 'HIGH';
-    else if (modelProb >= 0.25) riskClass = 'MODERATE';
-    else riskClass = 'LOW';
-
-    // 3. Generate 30-Min Dynamic Trajectory Forecast
-    const slope = trend === 'falling_rapidly' ? -2.2 : trend === 'falling' || trend === 'falling_slowly' ? -1.3 : trend === 'rising' ? 1.4 : trend === 'rising_rapidly' ? 2.5 : 0.0;
-    const iobDrop = iob * 9;
-    const carbBuffer = Math.min(30, carbs * 0.25);
-    const predicted30m = Math.max(40, Math.min(350, Math.round(g + (slope * 30) - iobDrop + carbBuffer)));
-
-    // 4. Reference Carbohydrate Coverage Calculation
+    // 3. Reference Carbohydrate Coverage Calculation
     const refBolus = calculateBolusReference({
       carbohydrates: carbs,
-      insulinCarbRatio: settings.icrRatio,
+      insulinCarbRatio: activeClinicalSettings.icrRatio,
       currentGlucose: g,
-      targetGlucose: (settings.targetMin + settings.targetMax) / 2,
-      correctionFactor: settings.correctionFactor,
+      targetGlucose: (activeClinicalSettings.targetMin + activeClinicalSettings.targetMax) / 2,
+      correctionFactor: activeClinicalSettings.correctionFactor,
       activeIob: iob
     });
 
-    // 5. Aggregate Daily Clinical Summary
+    // 4. Aggregate Daily Clinical Summary
     const timeInRange = g >= 70 && g <= 140 ? 82 : g < 70 ? 68 : 74;
     const todayMetrics = {
       timeInRangePct: timeInRange,
@@ -250,9 +321,9 @@ export function AppProvider({ children }) {
       mealDescription: patientInputs.mealDescription,
       // ML & Risk derivations
       modelProbability: modelProb,
-      riskScore: Math.round(modelProb * 100),
+      riskScore,
       riskClass,
-      riskLevel: evaluatedRisk.riskLevel,
+      riskLevel: riskClass,
       color: evaluatedRisk.color,
       headline: evaluatedRisk.headline,
       explanation: evaluatedRisk.explanation,
@@ -261,18 +332,29 @@ export function AppProvider({ children }) {
       isEmergencyHypo: g < 70 || evaluatedRisk.isEmergencyHypo,
       ruleOf15Armed: g < 70 || (modelProb >= 0.50 && g < 85),
       forecast30mGlucose: predicted30m,
+      conformalLower: asyncMLResult?.conformalLower,
+      conformalUpper: asyncMLResult?.conformalUpper,
+      mlSource: asyncMLResult?.mlSource || (mlStatus === 'online' ? 'FastAPI LightGBM' : 'Clinical Rule Engine'),
       referenceBolus: refBolus,
-      todayMetrics,
-      modelConfidence: 84
+      todayMetrics
     };
-  }, [patientInputs, settings]);
+  }, [patientInputs, activeClinicalSettings, asyncMLResult, mlStatus]);
 
-  // Action: Switch Persona and sync full telemetry
+  // Action: Update User Profile
+  const updateUserProfile = (newProfile) => {
+    setUserProfile(newProfile);
+    try {
+      localStorage.setItem('glucosaathi_user_profile', JSON.stringify(newProfile));
+    } catch {
+      // ignore
+    }
+  };
+
+  // Action: Switch Persona (Demo Mode)
   const switchPersona = (personaKey) => {
     if (DEMO_PERSONAS[personaKey]) {
       const p = DEMO_PERSONAS[personaKey];
       setCurrentPersonaKey(personaKey);
-      setSettings(p);
       setPatientInputs(p.defaultInputs);
       setActiveMeal({
         description: p.defaultInputs.mealDescription,
@@ -286,7 +368,7 @@ export function AppProvider({ children }) {
     }
   };
 
-  // Action: Update a single patient input (e.g. from sliders or buttons)
+  // Action: Update a single patient input (e.g. from sliders or inputs)
   const updatePatientInput = (key, value) => {
     setPatientInputs(prev => ({
       ...prev,
@@ -294,7 +376,7 @@ export function AppProvider({ children }) {
     }));
   };
 
-  // Action: Apply preset scenario (e.g., Safe, Active IOB, Hypo Alert)
+  // Action: Apply preset scenario
   const applyPresetScenario = (scenarioKey) => {
     if (scenarioKey === 'SAFE_LOW') {
       setPatientInputs(prev => ({
@@ -332,7 +414,7 @@ export function AppProvider({ children }) {
     }
   };
 
-  // Action: Log Meal and sync into PatientState
+  // Action: Log Meal
   const logMeal = async ({ description, carbs, confidence, items }) => {
     const mealCarbs = Number(carbs) || 0;
     const newMealRecord = {
@@ -367,7 +449,7 @@ export function AppProvider({ children }) {
     await DataService.saveMeal(newMealRecord);
   };
 
-  // Action: Log Blood Glucose and sync into PatientState
+  // Action: Log Glucose Reading
   const logGlucoseReading = async ({ value, mealRelation, trend, notes }) => {
     const num = Number(value);
     const newLog = {
@@ -393,54 +475,7 @@ export function AppProvider({ children }) {
     await DataService.saveGlucose(newLog);
   };
 
-  // Action: Log Insulin Dose and increase IOB
-  const logInsulinDose = async ({ amount, deliveryType, insulinType, carbsCovered }) => {
-    const num = Number(amount);
-    const newLog = {
-      id: `ins-${Date.now()}`,
-      type: 'insulin',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      dayGroup: 'Today',
-      title: `${deliveryType === 'bolus' ? 'Meal Bolus' : 'Basal'} Dose: ${num} U`,
-      amount: num,
-      insulinType,
-      carbsCovered,
-      calculatedDose: num
-    };
-
-    setHistory(prev => [newLog, ...prev]);
-    setPatientInputs(prev => ({
-      ...prev,
-      insulinOnBoard: Math.round((prev.insulinOnBoard + (num * 0.7)) * 10) / 10,
-      recentBolus: num
-    }));
-
-    await DataService.saveInsulin(newLog);
-  };
-
-  // Action: Log Physical Activity and sync
-  const logPhysicalActivity = async ({ activityType, intensity, durationMinutes }) => {
-    const newLog = {
-      id: `act-${Date.now()}`,
-      type: 'activity',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      dayGroup: 'Today',
-      title: `${activityType} (${durationMinutes} min)`,
-      activityType,
-      intensity,
-      durationMinutes
-    };
-
-    setHistory(prev => [newLog, ...prev]);
-    setPatientInputs(prev => ({
-      ...prev,
-      activityLevel: intensity || 'Moderate'
-    }));
-
-    await DataService.saveActivity(newLog);
-  };
-
-  // Action: Save Current Risk Assessment to Journal History
+  // Action: Log Risk Check to History
   const logRiskCheckToHistory = async () => {
     const newRecord = {
       id: `rc-${Date.now()}`,
@@ -481,10 +516,23 @@ export function AppProvider({ children }) {
         setIsActivityModalOpen,
         isDoctorReportModalOpen,
         setIsDoctorReportModalOpen,
+        isCSVImportOpen,
+        setIsCSVImportOpen,
+        isUserProfileOpen,
+        setIsUserProfileOpen,
 
-        // Persona & Settings
-        settings,
-        setSettings,
+        // Data Mode & User Profile
+        dataMode,
+        setDataMode,
+        userProfile,
+        updateUserProfile,
+        settings: activeClinicalSettings,
+        setSettings: setUserProfile,
+
+        // ML Status & Connection
+        mlStatus,
+
+        // Persona & Demo Scenarios
         currentPersonaKey,
         currentPersona,
         DEMO_PERSONAS: Object.values(DEMO_PERSONAS),
@@ -496,7 +544,7 @@ export function AppProvider({ children }) {
         updatePatientInput,
         applyPresetScenario,
 
-        // Specific Aliases for existing components (guarantees backward compatibility)
+        // Specific Aliases for backward compatibility
         riskInputs: {
           glucose: derivedPatientState.glucose,
           insulinOnBoard: derivedPatientState.insulinOnBoard,
@@ -525,13 +573,13 @@ export function AppProvider({ children }) {
 
         // History & Telemetry
         history,
+        setHistory,
         glucoseLogs,
+        setGlucoseLogs,
 
-        // Mutators / Actions
+        // Actions
         logMeal,
         logGlucoseReading,
-        logInsulinDose,
-        logPhysicalActivity,
         logRiskCheckToHistory
       }}
     >

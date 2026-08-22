@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import MyReadingWorkspace from './MyReadingWorkspace';
 import { 
   Activity, 
   TrendingDown, 
@@ -505,21 +506,24 @@ export default function Overview({ onNavigate }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* 05. LIVE INTERACTIVE DEMO (The Centerpiece Hackathon Simulator) */}
+      {/* 05. LIVE INTERACTIVE DEMO (User Workspace & Hackathon Simulator) */}
       {/* ========================================================================= */}
-      <section ref={simulatorRef} id="live-demo" className="space-y-6 pt-4">
+      <section ref={simulatorRef} id="live-demo" className="space-y-8 pt-4">
+        {/* Real User Input Reading Workspace */}
+        <MyReadingWorkspace onNavigate={onNavigate} />
+
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-black/5 pb-4">
           <div className="space-y-1 max-w-2xl">
             <div className="flex items-center space-x-2">
               <Sliders className="w-4 h-4 text-[#075B57]" />
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#075B57] bg-[#DFF4E8] px-2.5 py-0.5 rounded-full">
-                LIVE INTERACTIVE DEMO
+                LIVE INTERACTIVE SCENARIO SIMULATOR
               </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#063F3D] font-editorial tracking-tight pt-1">
-              Change the inputs. Watch the risk change.
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#063F3D] font-editorial tracking-tight pt-1">
+              Change the sliders. Watch the risk change.
             </h2>
-            <p className="text-sm text-[#5A6E85]">
+            <p className="text-xs sm:text-sm text-[#5A6E85]">
               Explore how glucose momentum, active insulin on board, meal carbohydrates, and physical activity affect short-term risk in real time.
             </p>
           </div>

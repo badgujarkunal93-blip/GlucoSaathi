@@ -9,6 +9,8 @@ import RiskCheck from './components/RiskCheck';
 import History from './components/History';
 import BottomNav from './components/BottomNav';
 import SettingsModal from './components/SettingsModal';
+import UserProfileModal from './components/UserProfileModal';
+import CSVImportModal from './components/CSVImportModal';
 import LogGlucoseModal from './components/LogGlucoseModal';
 import LogInsulinModal from './components/LogInsulinModal';
 import LogActivityModal from './components/LogActivityModal';
@@ -28,7 +30,11 @@ function MainContent() {
     isActivityModalOpen,
     setIsActivityModalOpen,
     isDoctorReportModalOpen,
-    setIsDoctorReportModalOpen
+    setIsDoctorReportModalOpen,
+    isCSVImportOpen,
+    setIsCSVImportOpen,
+    isUserProfileOpen,
+    setIsUserProfileOpen
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -87,7 +93,7 @@ function MainContent() {
         activeTab={activeTab} 
         setActiveTab={handleTabSwitch}
         onOpenDoctorReport={() => setIsDoctorReportModalOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={() => setIsUserProfileOpen(true)}
       />
 
       {/* 2. Main Application Content Container (Max width 1440px / 7xl) */}
@@ -105,6 +111,16 @@ function MainContent() {
       <Footer onNavigate={handleTabSwitch} />
 
       {/* 5. Clinical Modals & Drawers */}
+      <UserProfileModal 
+        isOpen={isUserProfileOpen} 
+        onClose={() => setIsUserProfileOpen(false)} 
+      />
+
+      <CSVImportModal 
+        isOpen={isCSVImportOpen} 
+        onClose={() => setIsCSVImportOpen(false)} 
+      />
+
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 

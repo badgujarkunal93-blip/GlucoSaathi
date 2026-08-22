@@ -12,11 +12,24 @@ import {
   X,
   AlertOctagon,
   Sparkles,
-  BookOpen
+  BookOpen,
+  UploadCloud,
+  Cpu
 } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, onOpenSettings }) {
-  const { currentPersona, switchPersona, DEMO_PERSONAS, patientState } = useApp();
+  const { 
+    currentPersona, 
+    switchPersona, 
+    DEMO_PERSONAS, 
+    patientState,
+    mlStatus,
+    dataMode,
+    setDataMode,
+    setIsCSVImportOpen,
+    setIsUserProfileOpen
+  } = useApp();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -86,8 +99,35 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
             })}
           </nav>
 
-          {/* 3. Right: Persona Selector & Emergency Status */}
-          <div className="hidden sm:flex items-center space-x-2.5 shrink-0">
+          {/* 3. Right: AI Model Status, Data Mode & Emergency Status */}
+          <div className="hidden sm:flex items-center space-x-2 shrink-0">
+            
+            {/* Live Model Connection Indicator */}
+            <div 
+              className={`px-2 py-1 rounded-lg border text-[11px] font-bold flex items-center space-x-1.5 transition-all ${
+                mlStatus === 'online'
+                  ? 'bg-[#DFF4E8] text-[#075B57] border-[#B8E8D2]'
+                  : 'bg-[#FEF7E6] text-[#8D4023] border-[#FFE280]'
+              }`}
+              title={mlStatus === 'online' ? 'Python FastAPI LightGBM Service Connected' : 'Local Deterministic Safety Engine Running'}
+            >
+              <Cpu className="w-3.5 h-3.5" />
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: mlStatus === 'online' ? '#1E9E67' : '#F2B84B' }} />
+              <span className="hidden xl:inline">
+                {mlStatus === 'online' ? 'AI Model Online' : 'Local Engine'}
+              </span>
+            </div>
+
+            {/* CSV Import Trigger */}
+            <button
+              onClick={() => setIsCSVImportOpen(true)}
+              className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#F3F1EA] border border-black/10 text-xs font-bold text-[#063F3D] flex items-center space-x-1 transition-all shadow-xs"
+              title="Import Glucose CSV"
+            >
+              <UploadCloud className="w-3.5 h-3.5 text-[#075B57]" />
+              <span className="hidden xl:inline">Import CSV</span>
+            </button>
+
             {/* Live Hypo Alert Badge if < 70 */}
             {isEmergency ? (
               <div className="px-2.5 py-1 rounded-lg bg-[#FDE8E9] border border-[#FFB4A8] text-[#C84B52] text-[11px] font-black flex items-center space-x-1 animate-pulse">
@@ -96,35 +136,40 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
               </div>
             ) : (
               <div className="px-2.5 py-1 rounded-lg bg-[#DFF4E8] text-[#075B57] text-[11px] font-bold flex items-center space-x-1">
-                <span className="w-2 h-2 rounded-full bg-[#1E9E67] animate-ping" />
                 <span>{patientState.glucose} mg/dL</span>
               </div>
             )}
 
-            {/* Persona Selector Dropdown */}
+            {/* Data Mode & Scenario Selector */}
             <div className="flex items-center bg-[#F3F1EA] rounded-xl p-0.5 border border-black/5">
-              <span className="text-[11px] font-bold text-[#66716F] pl-2 pr-1 flex items-center space-x-1">
-                <Zap className="w-3 h-3 text-[#F2B84B]" />
-                <span className="hidden xl:inline">Persona:</span>
-              </span>
               <select
-                value={currentPersona.id}
-                onChange={(e) => switchPersona(e.target.value)}
+                value={dataMode === 'my_data' ? 'my_data' : currentPersona.id}
+                onChange={(e) => {
+                  if (e.target.value === 'my_data') {
+                    setDataMode('my_data');
+                  } else {
+                    setDataMode('demo_scenario');
+                    switchPersona(e.target.value);
+                  }
+                }}
                 className="bg-white border-0 rounded-lg px-2.5 py-1 text-xs font-bold text-[#075B57] focus:outline-none cursor-pointer shadow-xs"
               >
-                {DEMO_PERSONAS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name.split(' ')[0]} ({p.age}y - {p.id === 'aarav' ? 'Active Adult' : p.id === 'priya' ? 'Pediatric' : 'NPH Regimen'})
-                  </option>
-                ))}
+                <option value="my_data">● My Live Data</option>
+                <optgroup label="Demo Scenarios (Judges)">
+                  {DEMO_PERSONAS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      Demo: {p.name.split(' ')[0]} ({p.age}y - {p.id === 'aarav' ? 'Adult' : p.id === 'priya' ? 'Student' : 'NPH'})
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </div>
 
             {/* Profile Settings Trigger */}
             <button
-              onClick={onOpenSettings}
+              onClick={() => setIsUserProfileOpen(true)}
               className="w-8 h-8 rounded-xl bg-white border border-black/10 hover:border-[#075B57] flex items-center justify-center text-[#075B57] transition-all shadow-xs"
-              title="Clinical Profile Settings"
+              title="My Clinical Profile Settings"
             >
               <User className="w-4 h-4" />
             </button>
@@ -173,33 +218,26 @@ export default function Navbar({ activeTab, setActiveTab, onOpenDoctorReport, on
           </div>
 
           <div className="pt-3 border-t border-black/5 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-[#66716F]">Persona:</span>
-              <select
-                value={currentPersona.id}
-                onChange={(e) => {
-                  switchPersona(e.target.value);
-                  setMobileMenuOpen(false);
-                }}
-                className="bg-[#F3F1EA] rounded-lg px-2 py-1 text-xs font-bold text-[#075B57]"
-              >
-                {DEMO_PERSONAS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name.split(' ')[0]} ({p.age}y)
-                  </option>
-                ))}
-              </select>
-            </div>
+            <button
+              onClick={() => {
+                setIsCSVImportOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="text-xs font-bold text-[#075B57] flex items-center space-x-1"
+            >
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>Import CSV</span>
+            </button>
 
             <button
               onClick={() => {
-                onOpenSettings();
+                setIsUserProfileOpen(true);
                 setMobileMenuOpen(false);
               }}
               className="text-xs font-bold text-[#075B57] flex items-center space-x-1"
             >
               <User className="w-3.5 h-3.5" />
-              <span>Profile</span>
+              <span>My Profile</span>
             </button>
           </div>
         </div>
