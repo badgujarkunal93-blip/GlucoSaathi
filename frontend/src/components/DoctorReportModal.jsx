@@ -1,10 +1,35 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, FileText, Download, Printer, ShieldCheck, Calendar, Activity, CheckCircle2 } from 'lucide-react';
+import { reportStorage } from '../services/reportStorage';
+import { 
+  X, 
+  FileText, 
+  Download, 
+  Printer, 
+  ShieldCheck, 
+  Calendar, 
+  Activity, 
+  CheckCircle2, 
+  ArrowRight,
+  BookmarkCheck,
+  Check
+} from 'lucide-react';
 
 export default function DoctorReportModal({ isOpen, onClose }) {
-  const { settings, history, glucoseLogs, patientState } = useApp();
+  const { 
+    settings, 
+    history, 
+    glucoseLogs, 
+    patientState, 
+    patientInputs, 
+    userProfile,
+    setAppMode,
+    setPipelineStep
+  } = useApp();
+
   const [reportPeriod, setReportPeriod] = useState('7_days');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   if (!isOpen) return null;
 
@@ -47,9 +72,76 @@ export default function DoctorReportModal({ isOpen, onClose }) {
     window.print();
   };
 
+  const handleSaveAndExit = () => {
+    if (isSaving) return;
+    setIsSaving(true);
+
+    // Build structured assessment snapshot from current state
+    const snapshot = {
+      id: `report_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+      reportVersion: '1.0',
+      patient: {
+        name: patientInputs.patientName || userProfile.name || settings.name || 'Patient Assessment',
+        age: patientInputs.patientAge || userProfile.age || settings.age || 26,
+        diagnosis: userProfile.condition || settings.condition || 'Type 1 Diabetes'
+      },
+      clinicalParameters: {
+        glucose: patientState.glucose || patientInputs.currentGlucose || 108,
+        glucoseTrend: patientState.trend || patientState.glucoseTrend || patientInputs.glucoseTrend || 'slow_fall',
+        activeInsulin: patientState.insulinOnBoard !== undefined ? patientState.insulinOnBoard : patientInputs.activeInsulin || 0.8,
+        icr: `1:${settings.icrRatio || 15}`,
+        isf: `1:${settings.correctionFactor || 50}`,
+        targetRange: `${settings.targetMin || 70}-${settings.targetMax || 140}`
+      },
+      meal: {
+        description: patientState.meal || patientInputs.mealText || '2 rotis, dal tadka and steamed rice',
+        estimatedCarbs: patientState.carbsConsumed || patientInputs.mealCarbs || 68
+      },
+      activity: {
+        level: patientState.activityLevel || patientInputs.activityLevel || 'Light'
+      },
+      prediction: {
+        forecast30Min: patientState.forecast30mGlucose || 98,
+        riskScore: patientState.riskScore !== undefined ? patientState.riskScore : 15,
+        riskLevel: patientState.riskClass || 'LOW',
+        isEmergencyHypo: patientState.isEmergencyHypo || false,
+        riskDrivers: patientState.riskFactors || ['Glucose Velocity', 'Active IOB']
+      },
+      glucoseMetrics: {
+        tir: timeInRangePercent,
+        meanGlucose: avgGlucose,
+        gmi: 6.2
+      },
+      meals: [
+        { name: 'Whole Wheat Roti', logs: 18, carbs: '15g/pc' },
+        { name: 'Dal Tadka', logs: 14, carbs: '18g/bowl' },
+        { name: 'Steamed Rice', logs: 12, carbs: '28g/bowl' }
+      ],
+      modelInfo: {
+        engine: 'LightGBM + ICMR-NIN IFCT 2017',
+        mode: 'Calibrated Clinical Decision Support'
+      }
+    };
+
+    // Save to persistent storage abstraction
+    reportStorage.saveReport(snapshot);
+
+    setSaveSuccess(true);
+
+    setTimeout(() => {
+      setIsSaving(false);
+      onClose();
+      if (setAppMode) setAppMode('saved-reports');
+      if (typeof window !== 'undefined') window.location.hash = '#saved-reports';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 600);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in overflow-y-auto">
       <div className="w-full max-w-2xl bg-white rounded-2xl border border-black/10 p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+        
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-black/8 pb-4">
           <div className="flex items-center space-x-3">
@@ -65,7 +157,7 @@ export default function DoctorReportModal({ isOpen, onClose }) {
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-[#66716F] hover:bg-[#F3F1EA] transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-[#66716F] hover:bg-[#F3F1EA] transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -74,7 +166,7 @@ export default function DoctorReportModal({ isOpen, onClose }) {
         <div className="p-4 rounded-xl bg-[#F7F8F5] border border-black/5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div>
             <span className="text-[#66716F] block">Patient Name:</span>
-            <span className="font-extrabold text-[#063F3D] text-sm">{settings.name}</span>
+            <span className="font-extrabold text-[#063F3D] text-sm">{patientInputs.patientName || settings.name}</span>
           </div>
           <div>
             <span className="text-[#66716F] block">Diagnosis:</span>
@@ -160,28 +252,61 @@ export default function DoctorReportModal({ isOpen, onClose }) {
           </p>
         </div>
 
-        {/* Modal Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-black/8">
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#F3F1EA] hover:bg-[#EAE6DC] text-xs font-bold text-[#063F3D] transition-colors flex items-center justify-center space-x-2"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Print Clinical PDF</span>
-          </button>
+        {/* Clean 3-Action Footer */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-black/8">
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="px-4 py-2.5 rounded-xl bg-[#F3F1EA] hover:bg-[#EAE6DC] text-xs font-bold text-[#063F3D] transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="px-4 py-2.5 rounded-xl bg-[#F3F1EA] hover:bg-[#EAE6DC] text-xs font-bold text-[#063F3D] transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export CSV</span>
+            </button>
+          </div>
 
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <button
               type="button"
-              onClick={handleExportCSV}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center space-x-2"
+              disabled={isSaving}
+              onClick={handleSaveAndExit}
+              className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-white text-xs font-extrabold transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer ${
+                saveSuccess
+                  ? 'bg-[#1E9E67]'
+                  : isSaving
+                    ? 'bg-[#075B57]/70 cursor-wait'
+                    : 'bg-[#075B57] hover:bg-[#063F3D] hover:scale-102'
+              }`}
             >
-              <Download className="w-4 h-4" />
-              <span>Export CSV Telemetry</span>
+              {saveSuccess ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Report Saved ✓</span>
+                </>
+              ) : isSaving ? (
+                <>
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  <span>Saving Snapshot...</span>
+                </>
+              ) : (
+                <>
+                  <BookmarkCheck className="w-4 h-4" />
+                  <span>Save & View Reports →</span>
+                </>
+              )}
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );

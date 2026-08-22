@@ -19,7 +19,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 
-export default function Navbar({ onOpenDoctorReport, onOpenSettings, onBackToLanding }) {
+export default function Navbar({ onOpenDoctorReport, onOpenSettings, onBackToLanding, onOpenSavedReports }) {
   const { 
     patientState,
     mlStatus,
@@ -32,7 +32,8 @@ export default function Navbar({ onOpenDoctorReport, onOpenSettings, onBackToLan
     unlockedStages,
     resetAnalysis,
     pipelineStatus,
-    backToLanding
+    backToLanding,
+    navigateToSavedReports
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -132,11 +133,24 @@ export default function Navbar({ onOpenDoctorReport, onOpenSettings, onBackToLan
           {/* 3. Right: AI Model Status, New Analysis & Settings */}
           <div className="hidden sm:flex items-center space-x-2 shrink-0">
             
+            {/* Saved Reports Archive Button */}
+            <button
+              onClick={() => {
+                if (onOpenSavedReports) onOpenSavedReports();
+                else if (navigateToSavedReports) navigateToSavedReports();
+              }}
+              className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#F3F1EA] border border-black/10 text-xs font-bold text-[#075B57] flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer"
+              title="Saved Clinical Reports Archive"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Saved Reports</span>
+            </button>
+
             {/* Reset / New Analysis Button when pipeline is complete */}
             {isCompleted && (
               <button
                 onClick={resetAnalysis}
-                className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#F3F1EA] border border-black/10 text-xs font-bold text-[#063F3D] flex items-center space-x-1 transition-all shadow-xs"
+                className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#F3F1EA] border border-black/10 text-xs font-bold text-[#063F3D] flex items-center space-x-1 transition-all shadow-xs cursor-pointer"
                 title="Start New Patient Analysis"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-[#075B57]" />

@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import LandingNavbar from './components/landing/LandingNavbar';
 import LandingPage from './components/landing/LandingPage';
 import LandingFooter from './components/landing/LandingFooter';
+import SavedReportsPage from './components/reports/SavedReportsPage';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import StagePatientInput from './components/pipeline/StagePatientInput';
@@ -20,7 +21,7 @@ import LogInsulinModal from './components/LogInsulinModal';
 import LogActivityModal from './components/LogActivityModal';
 import DoctorReportModal from './components/DoctorReportModal';
 import InteractiveClinicalGrid from './components/background/InteractiveClinicalGrid';
-import { ArrowRight, ChevronLeft, RotateCcw } from 'lucide-react';
+import { ArrowRight, ChevronLeft, RotateCcw, FolderArchive } from 'lucide-react';
 import Lenis from 'lenis';
 
 function MainContent() {
@@ -28,6 +29,7 @@ function MainContent() {
     appMode,
     startAssessment,
     backToLanding,
+    navigateToSavedReports,
     pipelineStep,
     setPipelineStep,
     pipelineStatus,
@@ -100,7 +102,7 @@ function MainContent() {
               </span>
               <button
                 onClick={() => handleNavigate('risk')}
-                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs cursor-pointer"
               >
                 <span>Proceed to Risk Prediction</span>
                 <ArrowRight className="w-4 h-4" />
@@ -118,7 +120,7 @@ function MainContent() {
               </span>
               <button
                 onClick={() => handleNavigate('dashboard')}
-                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs cursor-pointer"
               >
                 <span>Proceed to Health Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
@@ -136,7 +138,7 @@ function MainContent() {
               </span>
               <button
                 onClick={() => handleNavigate('journal')}
-                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs cursor-pointer"
               >
                 <span>Proceed to Health Journal</span>
                 <ArrowRight className="w-4 h-4" />
@@ -154,7 +156,7 @@ function MainContent() {
               </span>
               <button
                 onClick={() => setIsDoctorReportModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold flex items-center space-x-1.5 shadow-xs cursor-pointer"
               >
                 <span>Generate Doctor Report</span>
                 <ArrowRight className="w-4 h-4" />
@@ -187,36 +189,72 @@ function MainContent() {
       {/* ========================================================================= */}
       {appMode === 'landing' ? (
         <>
-          <LandingNavbar onStartAssessment={startAssessment} />
+          <LandingNavbar 
+            onStartAssessment={startAssessment} 
+            onOpenSavedReports={navigateToSavedReports}
+          />
           <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
             <LandingPage onStartAssessment={startAssessment} />
           </main>
-          <LandingFooter onStartAssessment={startAssessment} />
+          <LandingFooter 
+            onStartAssessment={startAssessment}
+            onOpenSavedReports={navigateToSavedReports}
+          />
         </>
-      ) : (
+      ) : appMode === 'saved-reports' ? (
         /* ========================================================================= */
-        /* 2. CLINICAL ASSESSMENT PIPELINE EXPERIENCE */
+        /* 2. SAVED CLINICAL REPORTS ARCHIVE EXPERIENCE */
         /* ========================================================================= */
         <>
           <Navbar 
             onOpenDoctorReport={() => setIsDoctorReportModalOpen(true)}
             onOpenSettings={() => setIsUserProfileOpen(true)}
             onBackToLanding={backToLanding}
+            onOpenSavedReports={navigateToSavedReports}
+          />
+          <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
+            <SavedReportsPage 
+              onStartNewAssessment={startAssessment}
+              onBackToHome={backToLanding}
+            />
+          </main>
+          <Footer onNavigate={handleNavigate} />
+        </>
+      ) : (
+        /* ========================================================================= */
+        /* 3. CLINICAL ASSESSMENT PIPELINE EXPERIENCE */
+        /* ========================================================================= */
+        <>
+          <Navbar 
+            onOpenDoctorReport={() => setIsDoctorReportModalOpen(true)}
+            onOpenSettings={() => setIsUserProfileOpen(true)}
+            onBackToLanding={backToLanding}
+            onOpenSavedReports={navigateToSavedReports}
           />
           
           <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12 space-y-4">
-            {/* Return to Product Overview link */}
+            {/* Return to Product Overview & Saved Reports links */}
             <div className="flex items-center justify-between pb-2 border-b border-black/5">
               <button
                 onClick={backToLanding}
-                className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#66716F] hover:text-[#075B57] transition-colors"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#66716F] hover:text-[#075B57] transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Back to Product Overview</span>
               </button>
 
-              <div className="text-[11px] text-[#075B57] font-bold">
-                Clinical Decision Support Session Active
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={navigateToSavedReports}
+                  className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#075B57] hover:underline cursor-pointer"
+                >
+                  <FolderArchive className="w-3.5 h-3.5" />
+                  <span>Saved Reports Archive</span>
+                </button>
+                <span className="text-[11px] text-[#66716F]">|</span>
+                <span className="text-[11px] text-[#075B57] font-bold">
+                  Clinical Session Active
+                </span>
               </div>
             </div>
 
@@ -232,7 +270,7 @@ function MainContent() {
         </>
       )}
 
-      {/* 3. Clinical Modals & Drawers */}
+      {/* 4. Clinical Modals & Drawers */}
       <UserProfileModal 
         isOpen={isUserProfileOpen} 
         onClose={() => setIsUserProfileOpen(false)} 

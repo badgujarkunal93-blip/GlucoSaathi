@@ -452,14 +452,62 @@ export function AppProvider({ children }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const navigateToSavedReports = () => {
+    setAppMode('saved-reports');
+    if (typeof window !== 'undefined') window.location.hash = '#saved-reports';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const reassessFromReport = (report) => {
+    if (!report) return;
+
+    // 1. Populate patient inputs from saved report
+    setPatientInputs(prev => ({
+      ...prev,
+      patientName: report.patient?.name || prev.patientName,
+      patientAge: report.patient?.age || prev.patientAge,
+      currentGlucose: report.clinicalParameters?.glucose || prev.currentGlucose,
+      glucoseTrend: report.clinicalParameters?.glucoseTrend || prev.glucoseTrend,
+      activeInsulin: report.clinicalParameters?.activeInsulin !== undefined ? report.clinicalParameters.activeInsulin : prev.activeInsulin,
+      mealText: report.meal?.description || prev.mealText,
+      mealCarbs: report.meal?.estimatedCarbs || prev.mealCarbs,
+      activityLevel: report.activity?.level || prev.activityLevel
+    }));
+
+    // 2. Populate patientState
+    setPatientState(prev => ({
+      ...prev,
+      glucose: report.clinicalParameters?.glucose || prev.glucose,
+      trend: report.clinicalParameters?.glucoseTrend || prev.trend,
+      glucoseTrend: report.clinicalParameters?.glucoseTrend || prev.glucoseTrend,
+      insulinOnBoard: report.clinicalParameters?.activeInsulin !== undefined ? report.clinicalParameters.activeInsulin : prev.insulinOnBoard,
+      carbsConsumed: report.meal?.estimatedCarbs || prev.carbsConsumed,
+      meal: report.meal?.description || prev.meal,
+      activityLevel: report.activity?.level || prev.activityLevel,
+      riskScore: report.prediction?.riskScore || prev.riskScore,
+      riskClass: report.prediction?.riskLevel || prev.riskClass,
+      forecast30mGlucose: report.prediction?.forecast30Min || prev.forecast30mGlucose
+    }));
+
+    // 3. Reset pipeline status and unlock input stage for editing
+    setPipelineStep('input');
+    setPipelineStatus('IDLE');
+    setUnlockedStages(['input']);
+    setAppMode('assessment');
+    if (typeof window !== 'undefined') window.location.hash = '#assessment';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <AppContext.Provider
       value={{
-        // App Mode (Landing vs Assessment Pipeline)
+        // App Mode ('landing' | 'assessment' | 'saved-reports')
         appMode,
         setAppMode,
         startAssessment,
         backToLanding,
+        navigateToSavedReports,
+        reassessFromReport,
 
         // Pipeline State Machine
         pipelineStep,

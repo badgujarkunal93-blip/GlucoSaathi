@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Activity, ArrowRight, Menu, X, Sparkles } from 'lucide-react';
+import { Activity, ArrowRight, Menu, X, Sparkles, FolderArchive } from 'lucide-react';
 
-export default function LandingNavbar({ onStartAssessment }) {
+export default function LandingNavbar({ onStartAssessment, onOpenSavedReports }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -57,6 +57,16 @@ export default function LandingNavbar({ onStartAssessment }) {
                 {link.label}
               </a>
             ))}
+
+            {onOpenSavedReports && (
+              <button
+                onClick={onOpenSavedReports}
+                className="text-xs font-bold text-[#075B57] hover:underline flex items-center space-x-1 cursor-pointer"
+              >
+                <FolderArchive className="w-3.5 h-3.5" />
+                <span>Saved Reports</span>
+              </button>
+            )}
           </nav>
 
           {/* 3. Right: Primary Action Button */}
@@ -103,6 +113,18 @@ export default function LandingNavbar({ onStartAssessment }) {
               {link.label}
             </a>
           ))}
+          {onOpenSavedReports && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenSavedReports();
+              }}
+              className="w-full text-left p-2 rounded-lg text-xs font-bold text-[#075B57] hover:bg-[#F7F8F5] flex items-center space-x-2"
+            >
+              <FolderArchive className="w-4 h-4" />
+              <span>Saved Reports Archive</span>
+            </button>
+          )}
           <div className="pt-2 border-t border-black/5">
             <button
               onClick={onStartAssessment}

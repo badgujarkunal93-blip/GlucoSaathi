@@ -1,7 +1,7 @@
 import React from 'react';
 import { Activity, ShieldCheck, ExternalLink } from 'lucide-react';
 
-export default function LandingFooter({ onStartAssessment }) {
+export default function LandingFooter({ onStartAssessment, onOpenSavedReports }) {
   const handleScrollTo = (e, href) => {
     e.preventDefault();
     const elem = document.querySelector(href);
@@ -43,10 +43,17 @@ export default function LandingFooter({ onStartAssessment }) {
             </h4>
             <ul className="space-y-1.5 text-xs text-[#DFF4E8]/80">
               <li>
-                <button onClick={onStartAssessment} className="hover:text-white transition-colors">
+                <button onClick={onStartAssessment} className="hover:text-white transition-colors cursor-pointer">
                   Start Assessment Pipeline
                 </button>
               </li>
+              {onOpenSavedReports && (
+                <li>
+                  <button onClick={onOpenSavedReports} className="hover:text-white transition-colors text-[#FFE280] font-semibold cursor-pointer">
+                    Saved Reports Archive
+                  </button>
+                </li>
+              )}
               <li>
                 <a href="#problem" onClick={(e) => handleScrollTo(e, '#problem')} className="hover:text-white transition-colors">
                   The Indian T1D Challenge
