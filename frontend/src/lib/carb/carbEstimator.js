@@ -107,7 +107,7 @@ export function estimateCarbohydrates(parsedItems = []) {
         glycemicIndex: matched.glycemicIndex || 'Medium',
         confidence: matched.confidence || 'High',
         icon: matched.icon || '🍽️',
-        source: matched.source || 'ICMR-NIN, 2020'
+        source: matched.source || 'ICMR-NIN IFCT 2017'
       };
     }
 

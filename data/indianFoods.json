@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "source": "ICMR-NIN Food Composition Tables (2020) & Diabetes Clinical Guidelines",
+  "source": "ICMR-NIN Indian Food Composition Tables (IFCT 2017) & Diabetes Clinical Guidelines",
   "disclaimer": "Carbohydrate values are calibrated for Indian dietary portions for Type 1 Diabetes reference.",
   "foods": [
     {
@@ -18,7 +18,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "paratha_plain",
@@ -35,7 +35,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "aloo_paratha",
@@ -52,7 +52,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "paneer_paratha",
@@ -69,7 +69,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "naan",
@@ -86,7 +86,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "puri",
@@ -103,7 +103,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "thepla",
@@ -120,7 +120,7 @@
       "glycemicIndex": "Low-Med",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "bhakhri",
@@ -137,7 +137,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "jowar_roti",
@@ -154,7 +154,7 @@
       "glycemicIndex": "Low-Med",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "bajra_roti",
@@ -171,7 +171,7 @@
       "glycemicIndex": "Low-Med",
       "confidence": "High",
       "icon": "🫓",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "rice",
@@ -188,7 +188,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🍚",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "brown_rice",
@@ -205,7 +205,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🍚",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "jeera_rice",
@@ -222,7 +222,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🍚",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "veg_biryani",
@@ -239,7 +239,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🍛",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "khichdi",
@@ -256,7 +256,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🍲",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "poha",
@@ -273,7 +273,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🥣",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "upma",
@@ -290,7 +290,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🥣",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "idli",
@@ -307,7 +307,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "⚪",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "dosa_plain",
@@ -324,7 +324,7 @@
       "glycemicIndex": "Med-High",
       "confidence": "High",
       "icon": "🥞",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "masala_dosa",
@@ -341,7 +341,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🥞",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "uttapam",
@@ -358,7 +358,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🥞",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "medu_vada",
@@ -375,7 +375,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🍩",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "dal_tadka",
@@ -392,7 +392,7 @@
       "glycemicIndex": "Low-Med",
       "confidence": "High",
       "icon": "🍲",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "dal_makhani",
@@ -409,7 +409,7 @@
       "glycemicIndex": "Low-Med",
       "confidence": "High",
       "icon": "🍲",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "sambar",
@@ -426,7 +426,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🍲",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "rajma",
@@ -443,7 +443,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥘",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "chole",
@@ -460,7 +460,7 @@
       "glycemicIndex": "Low-Med",
       "confidence": "High",
       "icon": "🥘",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "aloo_sabzi",
@@ -477,7 +477,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🥔",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "bhindi_sabzi",
@@ -494,7 +494,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥬",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "mixed_veg",
@@ -511,7 +511,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥬",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "paneer_gravy",
@@ -528,7 +528,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🧀",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "pav_bhaji",
@@ -545,7 +545,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🍲",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "pav",
@@ -562,7 +562,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🍞",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "chole_bhature",
@@ -579,7 +579,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🥘",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "curd",
@@ -596,7 +596,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥣",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "buttermilk",
@@ -613,7 +613,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥛",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "milk",
@@ -630,7 +630,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥛",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "masala_chai",
@@ -647,7 +647,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "☕",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "filter_coffee",
@@ -664,7 +664,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "☕",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "dhokla",
@@ -681,7 +681,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🟨",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "samosa",
@@ -698,7 +698,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🥟",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "roasted_chana",
@@ -715,7 +715,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥜",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "biscuits_glucose",
@@ -732,7 +732,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🍪",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "apple",
@@ -749,7 +749,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🍎",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "banana",
@@ -766,7 +766,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🍌",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "mango",
@@ -783,7 +783,7 @@
       "glycemicIndex": "Med-High",
       "confidence": "High",
       "icon": "🥭",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "papaya",
@@ -800,7 +800,7 @@
       "glycemicIndex": "Medium",
       "confidence": "High",
       "icon": "🍈",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "gulab_jamun",
@@ -817,7 +817,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🟤",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "kheer",
@@ -834,7 +834,7 @@
       "glycemicIndex": "High",
       "confidence": "High",
       "icon": "🥣",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "salad_green",
@@ -851,7 +851,7 @@
       "glycemicIndex": "Low",
       "confidence": "High",
       "icon": "🥗",
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "rajma_chawal_combo",
@@ -870,7 +870,7 @@
       "icon": "🍛",
       "isComposite": true,
       "items": ["rajma", "rice"],
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "dal_chawal_combo",
@@ -889,7 +889,7 @@
       "icon": "🍛",
       "isComposite": true,
       "items": ["dal_tadka", "rice"],
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "dosa_sambar_combo",
@@ -908,7 +908,7 @@
       "icon": "🥞",
       "isComposite": true,
       "items": ["dosa_plain", "sambar"],
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     },
     {
       "id": "idli_sambar_combo",
@@ -927,7 +927,7 @@
       "icon": "⚪",
       "isComposite": true,
       "items": ["idli", "sambar"],
-      "source": "ICMR-NIN, 2020"
+      "source": "ICMR-NIN IFCT 2017"
     }
   ]
 }

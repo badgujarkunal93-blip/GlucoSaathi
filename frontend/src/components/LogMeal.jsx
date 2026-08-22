@@ -22,16 +22,17 @@ import {
   Zap,
   Plus,
   Minus,
-  Trash2
+  Trash2,
+  Sliders
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export default function LogMeal() {
-  const { carryMealToRiskCheck, logMeal, settings } = useApp();
+export default function LogMeal({ onNavigate }) {
+  const { logMeal, settings, activeMeal, patientState } = useApp();
 
   const [mealText, setMealText] = useState('2 rotis, dal tadka and steamed rice');
   const [isParsing, setIsParsing] = useState(false);
-  const [parseSource, setParseSource] = useState('ICMR-NIN Indian Food Engine');
+  const [parseSource, setParseSource] = useState('ICMR-NIN IFCT 2017 Database');
   const [parsedResult, setParsedResult] = useState(() => parseIndianMeal('2 rotis, dal tadka and steamed rice'));
   const [selectedPhotoPreset, setSelectedPhotoPreset] = useState(SAMPLE_PHOTO_PRESETS[0]);
   const [mealLoggedSuccess, setMealLoggedSuccess] = useState(false);
@@ -92,7 +93,7 @@ export default function LogMeal() {
           notes: res.data.estimation.notes,
           rawInput: photo.detectedMeal
         });
-        setParseSource('Visual Plate Recognition & ICMR Database');
+        setParseSource('Visual Plate Recognition & IFCT 2017');
       }
     } catch {
       const result = parseIndianMeal(photo.detectedMeal);
@@ -171,14 +172,8 @@ export default function LogMeal() {
     });
   };
 
-  // Continue to Risk Check
-  const handleContinueToRiskCheck = () => {
-    const carbs = parsedResult ? parsedResult.totalCarbs : 68;
-    carryMealToRiskCheck(carbs, mealText || 'Indian Meal');
-  };
-
-  // Save to Log History
-  const handleSaveMealLog = () => {
+  // Apply to Patient State & Sync across application
+  const handleSyncToPatientState = () => {
     if (!parsedResult) return;
     logMeal({
       description: mealText || 'Indian Meal',
@@ -187,31 +182,36 @@ export default function LogMeal() {
       items: parsedResult.items
     });
     setMealLoggedSuccess(true);
-    confetti({ particleCount: 35, spread: 50, origin: { y: 0.7 } });
+    confetti({ particleCount: 35, spread: 50, origin: { y: 0.6 } });
+    setTimeout(() => {
+      if (onNavigate) onNavigate('risk');
+    }, 800);
   };
 
-  const calculatedBolus = parsedResult 
-    ? ((parsedResult.totalCarbs) / settings.icrRatio).toFixed(1)
-    : '4.5';
-
   return (
-    <div className="space-y-8 animate-fade-in pb-20 lg:pb-8">
+    <div className="space-y-8 animate-fade-in pb-20 lg:pb-12 pt-2">
       {/* 1. Header & Context */}
-      <div className="space-y-1">
-        <div className="flex items-center space-x-2">
-          <span className="text-[11px] font-black text-[#8D4023] uppercase tracking-wider bg-[#FFE0D1] px-2.5 py-0.5 rounded-[6px] border border-[#FFC4AB]">
-            INDIA-FIRST T1D NUTRITION
-          </span>
-          <span className="text-xs text-[#5A6E85] font-medium hidden sm:inline">
-            • ICMR-NIN (2020) Calibrated
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/5 pb-4">
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <span className="text-[11px] font-black text-[#8D4023] uppercase tracking-wider bg-[#FFE0D1] px-2.5 py-0.5 rounded-full border border-[#FFC4AB]">
+              INDIA-FIRST NUTRITIONAL KNOWLEDGE
+            </span>
+            <span className="text-xs text-[#66716F] font-semibold hidden sm:inline">
+              • ICMR-NIN IFCT 2017 Calibrated
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#063F3D] tracking-tight font-editorial pt-1">
+            Indian Meal Carbohydrate Analyzer
+          </h2>
+          <p className="text-sm text-[#66716F] font-normal">
+            Type naturally in Hindi/English or upload a photo. The system identifies foods and estimates net carbs strictly from ICMR-NIN IFCT 2017.
+          </p>
         </div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-[#172640] tracking-tight font-display pt-1">
-          Estimate Indian Meal Carbs
-        </h2>
-        <p className="text-sm text-[#5A6E85] font-normal">
-          Type naturally in Hindi/English or snap a photo of your plate.
-        </p>
+
+        <div className="px-3 py-1.5 rounded-xl bg-white border border-black/10 text-xs font-bold text-[#075B57] shadow-xs shrink-0 self-start sm:self-auto">
+          Active Patient: <strong className="text-[#063F3D]">{settings.name}</strong>
+        </div>
       </div>
 
       {/* 2. Main Two-Column Layout */}
@@ -219,13 +219,13 @@ export default function LogMeal() {
         {/* LEFT COLUMN: Input Canvas (6 cols) */}
         <div className="lg:col-span-6 space-y-6">
           {/* Text Input Card */}
-          <div className="p-6 rounded-[16px] bg-white border border-[#E2E8DF] paper-elevation-base space-y-4">
+          <div className="editorial-card p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-black uppercase tracking-wider text-[#172640] flex items-center space-x-1.5">
-                <Utensils className="w-3.5 h-3.5 text-[#00AFC1]" />
+              <label className="text-xs font-black uppercase tracking-wider text-[#063F3D] flex items-center space-x-1.5">
+                <Utensils className="w-3.5 h-3.5 text-[#075B57]" />
                 <span>Describe Your Meal</span>
               </label>
-              <span className="text-[11px] text-[#5A6E85] font-semibold">Natural language</span>
+              <span className="text-[11px] text-[#66716F] font-semibold">Natural language</span>
             </div>
 
             <div className="relative">
@@ -234,14 +234,14 @@ export default function LogMeal() {
                 onChange={(e) => setMealText(e.target.value)}
                 placeholder="e.g., 2 rotis, 1 bowl dal tadka, steamed rice and curd"
                 rows={3}
-                className="w-full p-3.5 bg-[#FAFBF8] border border-[#E2E8DF] rounded-xl text-sm text-[#172640] font-medium placeholder-[#8292A6] focus:outline-none focus:border-[#00AFC1] focus:ring-2 focus:ring-[#00AFC1]/15 transition-all resize-none"
+                className="w-full p-3.5 bg-[#F7F8F5] border border-black/10 rounded-xl text-sm text-[#063F3D] font-medium placeholder-[#8A9694] focus:outline-none focus:border-[#075B57] focus:ring-2 focus:ring-[#075B57]/15 transition-all resize-none"
               />
             </div>
 
             {/* Quick Suggestions */}
             <div className="space-y-2">
-              <span className="text-[11px] font-bold text-[#5A6E85] uppercase tracking-wider block">
-                Common Indian Presets:
+              <span className="text-[11px] font-bold text-[#66716F] uppercase tracking-wider block">
+                Common Indian Composite Presets:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {DEMO_MEAL_PRESETS.map((preset, idx) => (
@@ -249,7 +249,7 @@ export default function LogMeal() {
                     key={idx}
                     type="button"
                     onClick={() => handleSelectPreset(preset)}
-                    className="px-2.5 py-1 rounded-lg bg-[#FAFBF8] hover:bg-[#F2F5F2] border border-[#E2E8DF] text-[11px] font-bold text-[#172640] transition-colors flex items-center space-x-1"
+                    className="px-2.5 py-1 rounded-lg bg-[#F7F8F5] hover:bg-[#F3F1EA] border border-black/8 text-[11px] font-bold text-[#063F3D] transition-colors flex items-center space-x-1"
                   >
                     <span>{preset.icon}</span>
                     <span>{preset.label}</span>
@@ -262,30 +262,30 @@ export default function LogMeal() {
             <button
               onClick={() => handleEstimateCarbs()}
               disabled={isParsing || !mealText.trim()}
-              className="w-full py-3 px-4 rounded-xl bg-[#00AFC1] hover:bg-[#0098A8] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-xs flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {isParsing ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Analyzing with AI & ICMR Database...</span>
+                  <span>Analyzing with AI & IFCT 2017 Database...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span>Estimate Carbohydrates</span>
+                  <span>Analyze Meal & Lookup Carbs</span>
                 </>
               )}
             </button>
           </div>
 
           {/* Photo Recognition Card */}
-          <div className="p-6 rounded-[16px] bg-white border border-[#E2E8DF] paper-elevation-base space-y-4">
+          <div className="editorial-card p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-black uppercase tracking-wider text-[#172640] flex items-center space-x-1.5">
-                <Camera className="w-3.5 h-3.5 text-[#533BA1]" />
+              <label className="text-xs font-black uppercase tracking-wider text-[#063F3D] flex items-center space-x-1.5">
+                <Camera className="w-3.5 h-3.5 text-[#00AFC1]" />
                 <span>Snap or Upload Meal Photo</span>
               </label>
-              <span className="text-[11px] text-[#5A6E85] font-semibold">Gemini Vision AI</span>
+              <span className="text-[11px] text-[#66716F] font-semibold">Gemini Vision AI</span>
             </div>
 
             {/* Photo Preset Gallery */}
@@ -297,12 +297,12 @@ export default function LogMeal() {
                   onClick={() => handleSelectPhoto(photo)}
                   className={`relative aspect-4/3 rounded-xl overflow-hidden border-2 transition-all group ${
                     selectedPhotoPreset.id === photo.id
-                      ? 'border-[#00AFC1] ring-2 ring-[#00AFC1]/20 scale-[1.02]'
-                      : 'border-[#E2E8DF] hover:border-[#CBD5E1]'
+                      ? 'border-[#075B57] ring-2 ring-[#075B57]/20 scale-[1.02]'
+                      : 'border-black/10 hover:border-black/20'
                   }`}
                 >
                   <img src={photo.url} alt={photo.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#172640]/80 via-transparent to-transparent flex items-end p-1.5">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-1.5">
                     <span className="text-[10px] text-white font-bold truncate leading-tight">
                       {photo.name}
                     </span>
@@ -312,35 +312,35 @@ export default function LogMeal() {
             </div>
 
             {/* File Upload Input */}
-            <label className="flex items-center justify-center space-x-2 py-3 border-2 border-dashed border-[#E2E8DF] hover:border-[#00AFC1] rounded-xl cursor-pointer bg-[#FAFBF8] transition-colors text-xs font-bold text-[#5A6E85]">
-              <UploadCloud className="w-4 h-4 text-[#00AFC1]" />
-              <span>Upload Custom Photo</span>
+            <label className="flex items-center justify-center space-x-2 py-3 border-2 border-dashed border-black/15 hover:border-[#075B57] rounded-xl cursor-pointer bg-[#F7F8F5] transition-colors text-xs font-bold text-[#66716F]">
+              <UploadCloud className="w-4 h-4 text-[#075B57]" />
+              <span>Upload Custom Meal Photo</span>
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Nutrition Breakdown & Reference Bolus (6 cols) */}
+        {/* RIGHT COLUMN: Nutrition Breakdown & Synchronized State (6 cols) */}
         <div className="lg:col-span-6 space-y-6">
           {parsedResult ? (
-            <div className="p-6 sm:p-7 rounded-[16px] bg-[#FFF8F5] border border-[#FFD9C9] paper-elevation-hero space-y-6">
+            <div className="editorial-card p-6 sm:p-7 space-y-6">
               {/* Top Banner: Total Carbs & Range */}
-              <div className="flex items-center justify-between border-b border-[#FFD9C9] pb-4">
+              <div className="flex items-center justify-between border-b border-black/5 pb-4">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-[#8D4023] bg-[#FFE0D1] px-2 py-0.5 rounded border border-[#FFC4AB]">
                     {parsedResult.confidence} CONFIDENCE ESTIMATE
                   </span>
-                  <div className="text-4xl font-extrabold text-[#552310] font-display mt-2">
-                    {parsedResult.totalCarbs}g <span className="text-base font-normal text-[#8D4023]">Total Carbs</span>
+                  <div className="text-4xl font-extrabold text-[#063F3D] font-display mt-2">
+                    {parsedResult.totalCarbs}g <span className="text-base font-normal text-[#66716F]">Net Carbs</span>
                   </div>
                   <div className="text-xs text-[#8D4023] font-bold mt-0.5">
-                    Realistic Range: {parsedResult.rangeText}
+                    Estimated Range: {parsedResult.rangeText}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[10px] font-bold text-[#5A6E85] block">Engine Source:</span>
-                  <span className="text-[11px] font-extrabold text-[#172640] block max-w-[140px] truncate">
+                  <span className="text-[10px] font-bold text-[#66716F] block">Nutrition Database:</span>
+                  <span className="text-[11px] font-extrabold text-[#063F3D] block max-w-[150px] truncate">
                     {parseSource}
                   </span>
                 </div>
@@ -349,46 +349,46 @@ export default function LogMeal() {
               {/* Itemized Foods Breakdown with Editable Portions */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#552310]">
-                    Parsed Items (Click + / - to adjust portions):
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#063F3D]">
+                    Itemized Foods (Click + / - to adjust portions):
                   </span>
-                  <span className="text-[11px] text-[#8D4023] font-medium">Live recalculation</span>
+                  <span className="text-[11px] text-[#075B57] font-bold">Live recalculation</span>
                 </div>
 
                 <div className="space-y-2">
                   {parsedResult.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl bg-white border border-[#FFD9C9] flex items-center justify-between text-xs"
+                      className="p-3 rounded-xl bg-[#F7F8F5] border border-black/5 flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center space-x-2.5">
                         <span className="text-base">{item.icon || '🍽️'}</span>
                         <div>
-                          <div className="font-bold text-[#172640]">{item.name}</div>
-                          <div className="text-[11px] text-[#5A6E85]">
-                            GI: {item.glycemicIndex || 'Medium'} • {item.unit}
+                          <div className="font-bold text-[#063F3D]">{item.name}</div>
+                          <div className="text-[11px] text-[#66716F]">
+                            GI: {item.glycemicIndex || 'Medium'} • {item.unit || 'serving'}
                           </div>
                         </div>
                       </div>
 
                       {/* Portion Controls (+ / -) and Carbs */}
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-1 bg-[#FAFBF8] border border-[#E2E8DF] rounded-lg p-0.5">
+                        <div className="flex items-center space-x-1 bg-white border border-black/10 rounded-lg p-0.5">
                           <button
                             type="button"
                             onClick={() => handleUpdateQuantity(idx, -0.5)}
-                            className="p-1 rounded text-[#5A6E85] hover:bg-white hover:text-[#172640] transition-colors"
+                            className="p-1 rounded text-[#66716F] hover:bg-[#F3F1EA] hover:text-[#063F3D] transition-colors"
                             title="Decrease portion"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="px-1.5 font-bold text-[#172640] text-xs">
+                          <span className="px-1.5 font-bold text-[#063F3D] text-xs">
                             {item.quantity}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleUpdateQuantity(idx, 0.5)}
-                            className="p-1 rounded text-[#5A6E85] hover:bg-white hover:text-[#172640] transition-colors"
+                            className="p-1 rounded text-[#66716F] hover:bg-[#F3F1EA] hover:text-[#063F3D] transition-colors"
                             title="Increase portion"
                           >
                             <Plus className="w-3 h-3" />
@@ -402,7 +402,7 @@ export default function LogMeal() {
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(idx)}
-                          className="text-[#8292A6] hover:text-red-500 p-1 transition-colors"
+                          className="text-[#8A9694] hover:text-red-500 p-1 transition-colors"
                           title="Remove item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -413,57 +413,36 @@ export default function LogMeal() {
                 </div>
               </div>
 
-              {/* Reference Bolus Calculator Card */}
-              <div className="p-4 rounded-xl bg-white border border-[#FFD9C9] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-[#172640] flex items-center space-x-1">
-                    <Zap className="w-3.5 h-3.5 text-[#00AFC1]" />
-                    <span>Reference Bolus Calculation</span>
-                  </span>
-                  <span className="text-xs font-bold text-[#00AFC1]">
-                    ICR 1:{settings.icrRatio}g
-                  </span>
+              {/* Carbohydrate Coverage Reference Card */}
+              <div className="p-4 rounded-xl bg-[#F3F1EA] border border-black/5 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-bold text-[#063F3D]">
+                  <span>Carbohydrate Coverage Reference</span>
+                  <span className="text-[#075B57]">Prescribed ICR 1:{settings.icrRatio}g</span>
                 </div>
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-2xl font-black text-[#172640] font-display">
-                    ~{calculatedBolus} Units
-                  </span>
-                  <span className="text-xs text-[#5A6E85]">
-                    ({parsedResult.totalCarbs}g / {settings.icrRatio})
-                  </span>
+                <div className="text-2xl font-black text-[#063F3D] font-display">
+                  {parsedResult.totalCarbs}g Carbs
                 </div>
-                <p className="text-[11px] text-[#5A6E85] leading-relaxed">
-                  Reference estimate only. Always verify with your prescribed physician care plan before dosing.
+                <p className="text-[11px] text-[#66716F] leading-relaxed">
+                  Reference formula ratio: ~{(parsedResult.totalCarbs / settings.icrRatio).toFixed(1)} Units. Informational only. Never dose insulin without following your prescribed care plan.
                 </p>
               </div>
 
-              {/* Actions */}
+              {/* Actions: Sync to Patient State */}
               <div className="space-y-2.5 pt-2">
                 <button
-                  onClick={handleContinueToRiskCheck}
-                  className="w-full py-3.5 px-4 rounded-xl bg-[#552310] hover:bg-[#3D180B] text-white text-xs font-extrabold tracking-wide uppercase transition-all shadow-md flex items-center justify-center space-x-2"
+                  onClick={handleSyncToPatientState}
+                  className="w-full py-3.5 px-4 rounded-xl bg-[#075B57] hover:bg-[#063F3D] text-white text-xs font-extrabold tracking-wide uppercase transition-all shadow-xs flex items-center justify-center space-x-2"
                 >
-                  <span>Evaluate Hypo Risk with this Meal</span>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Sync Carbs to Patient State & Evaluate Risk</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={handleSaveMealLog}
-                  disabled={mealLoggedSuccess}
-                  className={`w-full py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                    mealLoggedSuccess
-                      ? 'bg-[#D8F3E7] border-[#B8E8D2] text-[#093B22]'
-                      : 'bg-white border-[#FFD9C9] text-[#8D4023] hover:bg-[#FFF2EB]'
-                  }`}
-                >
-                  {mealLoggedSuccess ? '✓ Saved to Meal Logs' : 'Save to History Logs'}
                 </button>
               </div>
             </div>
           ) : (
-            <div className="p-12 rounded-[16px] bg-white border border-[#E2E8DF] text-center text-[#5A6E85] space-y-2">
-              <Utensils className="w-8 h-8 mx-auto text-[#CBD5E1]" />
-              <p className="text-sm font-bold text-[#172640]">No Meal Parsed Yet</p>
+            <div className="editorial-card p-12 text-center text-[#66716F] space-y-2">
+              <Utensils className="w-8 h-8 mx-auto text-[#8A9694]" />
+              <p className="text-sm font-bold text-[#063F3D]">No Meal Parsed Yet</p>
               <p className="text-xs">Enter a meal description or select a photo preset to begin.</p>
             </div>
           )}

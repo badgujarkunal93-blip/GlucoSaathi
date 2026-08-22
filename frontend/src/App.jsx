@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-import LandingJourney from './components/landing/LandingJourney';
+import Overview from './components/Overview';
 import Dashboard from './components/Dashboard';
 import LogMeal from './components/LogMeal';
 import RiskCheck from './components/RiskCheck';
 import History from './components/History';
+import BottomNav from './components/BottomNav';
 import SettingsModal from './components/SettingsModal';
 import LogGlucoseModal from './components/LogGlucoseModal';
 import LogInsulinModal from './components/LogInsulinModal';
@@ -27,11 +28,10 @@ function MainContent() {
     isActivityModalOpen,
     setIsActivityModalOpen,
     isDoctorReportModalOpen,
-    setIsDoctorReportModalOpen,
-    applyPresetScenario
+    setIsDoctorReportModalOpen
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState('story');
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
@@ -58,45 +58,31 @@ function MainContent() {
     if (tab === 'meal') navigateTo('log-meal');
     else if (tab === 'risk') navigateTo('risk-check');
     else if (tab === 'dashboard') navigateTo('dashboard');
-    else if (tab === 'history') navigateTo('history');
+    else if (tab === 'journal') navigateTo('history');
+    else navigateTo('overview');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleStartDemo = () => {
-    applyPresetScenario('MODERATE_CAUTION');
-    handleTabSwitch('dashboard');
   };
 
   const renderActiveView = () => {
     switch (activeTab) {
-      case 'story':
-        return (
-          <LandingJourney 
-            onNavigate={handleTabSwitch}
-            onStartDemo={handleStartDemo}
-          />
-        );
+      case 'overview':
+        return <Overview onNavigate={handleTabSwitch} />;
       case 'meal':
-        return <LogMeal />;
+        return <LogMeal onNavigate={handleTabSwitch} />;
       case 'risk':
-        return <RiskCheck />;
+        return <RiskCheck onNavigate={handleTabSwitch} />;
       case 'dashboard':
-        return <Dashboard />;
-      case 'history':
-        return <History />;
+        return <Dashboard onNavigate={handleTabSwitch} />;
+      case 'journal':
+        return <History onNavigate={handleTabSwitch} />;
       default:
-        return (
-          <LandingJourney 
-            onNavigate={handleTabSwitch}
-            onStartDemo={handleStartDemo}
-          />
-        );
+        return <Overview onNavigate={handleTabSwitch} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
-      {/* 1. Floating Editorial Navbar */}
+      {/* 1. Professional Healthcare Top Header */}
       <Navbar 
         activeTab={activeTab} 
         setActiveTab={handleTabSwitch}
@@ -104,15 +90,21 @@ function MainContent() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {/* 2. Main Canvas View */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+      {/* 2. Main Application Content Container (Max width 1440px / 7xl) */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
         {renderActiveView()}
       </main>
 
-      {/* 3. Editorial Footer */}
+      {/* 3. Responsive Mobile Bottom Navigation */}
+      <BottomNav 
+        activeTab={activeTab} 
+        setActiveTab={handleTabSwitch} 
+      />
+
+      {/* 4. Editorial Application Footer */}
       <Footer onNavigate={handleTabSwitch} />
 
-      {/* 4. Clinical Modals & Drawers */}
+      {/* 5. Clinical Modals & Drawers */}
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 

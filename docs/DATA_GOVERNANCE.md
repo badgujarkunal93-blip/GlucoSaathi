@@ -27,7 +27,7 @@ The *Digital Personal Data Protection Act, 2023 (DPDPA 2023)* establishes statut
 
 ### **A. Encryption Standards**
 * **In Transit**: All network traffic between client browser/mobile devices and GlucoSaathi API servers is strictly enforced over **TLS 1.3** with Perfect Forward Secrecy (PFS) and HTTP Strict Transport Security (HSTS).
-* **At Rest**: Continuous glucose streams, meal records, and insulin logs stored in PostgreSQL/Supabase are encrypted using **AES-256-GCM** with envelope key management via Cloud KMS / Vault.
+* **At Rest**: Continuous glucose streams, meal records, and insulin logs stored in Firestore and Firebase Cloud Storage are encrypted using **AES-256-GCM** with envelope key management via Google Cloud KMS.
 
 ### **B. Granular Patient-Mediated Access Control**
 * GlucoSaathi enforces **Row-Level Security (RLS)** at the database tier.
