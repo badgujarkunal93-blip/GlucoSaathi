@@ -15,6 +15,7 @@ import LogGlucoseModal from './components/LogGlucoseModal';
 import LogInsulinModal from './components/LogInsulinModal';
 import LogActivityModal from './components/LogActivityModal';
 import DoctorReportModal from './components/DoctorReportModal';
+import InteractiveCrossGrid from './components/background/InteractiveCrossGrid';
 import Lenis from 'lenis';
 
 function MainContent() {
@@ -87,8 +88,24 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
-      {/* 1. Professional Healthcare Top Header */}
+    <div className="min-h-screen relative overflow-x-hidden bg-[#F7F8F5] text-[#111817] flex flex-col justify-between selection:bg-[#1E9E67]/20 selection:text-[#075B57] font-sans">
+      {/* 0. Subtle Medical Telemetry Interactive Cross Grid (Sits at z-0 behind content) */}
+      <InteractiveCrossGrid 
+        crossSize={6}
+        strokeWidth={1.2}
+        interactionRadius={190}
+        maxDisplacement={18}
+        springStrength={0.055}
+        damping={0.88}
+        baseOpacity={0.12}
+        activeColor="#075B57"
+        accentColor="#1E9E67"
+        enableRipple={true}
+        enableConnections={true}
+        enableCursorGlow={true}
+      />
+
+      {/* 1. Professional Healthcare Top Header (z-50) */}
       <Navbar 
         activeTab={activeTab} 
         setActiveTab={handleTabSwitch}
@@ -96,8 +113,8 @@ function MainContent() {
         onOpenSettings={() => setIsUserProfileOpen(true)}
       />
 
-      {/* 2. Main Application Content Container (Max width 1440px / 7xl) */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+      {/* 2. Main Application Content Container (z-10, max width 1440px / 7xl) */}
+      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
         {renderActiveView()}
       </main>
 

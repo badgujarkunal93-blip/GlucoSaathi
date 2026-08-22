@@ -3,7 +3,7 @@ import { Activity, ShieldCheck, ExternalLink } from 'lucide-react';
 
 export default function Footer({ onNavigate }) {
   return (
-    <footer className="bg-[#063F3D] text-white pt-14 pb-12 border-t border-white/10 mt-16">
+    <footer className="relative z-10 bg-[#063F3D] text-white pt-14 pb-12 border-t border-white/10 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           {/* Brand & Purpose (6 cols) */}
